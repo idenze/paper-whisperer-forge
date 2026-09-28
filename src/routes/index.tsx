@@ -69,7 +69,7 @@ function Index() {
                   </a>
                 </Button>
               ) : (
-                <Button key={label} variant="ghost" onClick={() => setActiveTab(label)} aria-current={activeTab === label ? "page" : undefined} className={activeTab === label ? "bg-secondary text-secondary-foreground" : ""}>
+                <Button key={label} variant="ghost" onClick={() => setActiveTab(label as Tab)} aria-current={activeTab === label ? "page" : undefined} className={activeTab === label ? "bg-secondary text-secondary-foreground" : ""}>
                   <Icon className="size-4" /> {label}
                 </Button>
               ),
