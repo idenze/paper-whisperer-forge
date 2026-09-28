@@ -34,14 +34,14 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Tab = "Home" | "Learn" | "Practise" | "Tutor" | "Dictionary" | "Profile";
+type Tab = "Home" | "Learn" | "Tutor" | "Profile";
 
 const navItems = [
   { label: "Home", icon: Home },
   { label: "Learn", icon: BookOpen },
-  { label: "Practise", icon: Sparkles },
+  { label: "Practise", icon: Sparkles, href: "https://ozituma.com/practice" },
   { label: "Tutor", icon: MessageCircle },
-  { label: "Dictionary", icon: Search },
+  { label: "Dictionary", icon: Search, href: "https://ozituma.com/" },
   { label: "Profile", icon: UserRound },
 ] as const;
 
@@ -61,11 +61,19 @@ function Index() {
         <div className="mx-auto flex h-18 max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-10">
           <OzitumaMark />
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
-            {navItems.map(({ label, icon: Icon }) => (
-              <Button key={label} variant="ghost" onClick={() => setActiveTab(label)} aria-current={activeTab === label ? "page" : undefined} className={activeTab === label ? "bg-secondary text-secondary-foreground" : ""}>
-                <Icon className="size-4" /> {label}
-              </Button>
-            ))}
+            {navItems.map(({ label, icon: Icon, ...item }) =>
+              "href" in item ? (
+                <Button key={label} asChild variant="ghost">
+                  <a href={item.href} target="_blank" rel="noopener noreferrer">
+                    <Icon className="size-4" /> {label}
+                  </a>
+                </Button>
+              ) : (
+                <Button key={label} variant="ghost" onClick={() => setActiveTab(label as Tab)} aria-current={activeTab === label ? "page" : undefined} className={activeTab === label ? "bg-secondary text-secondary-foreground" : ""}>
+                  <Icon className="size-4" /> {label}
+                </Button>
+              ),
+            )}
           </nav>
           <div className="flex items-center gap-3">
             <div className="hidden items-center gap-2 rounded-md border border-border bg-card px-3 py-2 sm:flex">
@@ -173,7 +181,13 @@ function Index() {
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-lg lg:hidden" aria-label="Mobile navigation">
-        {navItems.slice(0, 5).map(({ label, icon: Icon }) => <button key={label} onClick={() => setActiveTab(label)} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-bold ${activeTab === label ? "text-primary" : "text-muted-foreground"}`}><Icon className="size-5" />{label}</button>)}
+        {navItems.slice(0, 5).map(({ label, icon: Icon, ...item }) =>
+          "href" in item ? (
+            <a key={label} href={item.href} target="_blank" rel="noopener noreferrer" className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-bold text-muted-foreground"><Icon className="size-5" />{label}</a>
+          ) : (
+            <button key={label} onClick={() => setActiveTab(label as Tab)} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-bold ${activeTab === label ? "text-primary" : "text-muted-foreground"}`}><Icon className="size-5" />{label}</button>
+          ),
+        )}
       </nav>
 
       {lessonOpen && <LessonDialog answer={answer} setAnswer={setAnswer} onClose={() => setLessonOpen(false)} onComplete={() => { markDone("continue"); setLessonOpen(false); }} />}
