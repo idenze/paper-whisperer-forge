@@ -34,14 +34,14 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Tab = "Home" | "Learn" | "Practise" | "Tutor" | "Dictionary" | "Profile";
+type Tab = "Home" | "Learn" | "Tutor" | "Profile";
 
 const navItems = [
   { label: "Home", icon: Home },
   { label: "Learn", icon: BookOpen },
-  { label: "Practise", icon: Sparkles },
+  { label: "Practise", icon: Sparkles, href: "https://ozituma.com/practice" },
   { label: "Tutor", icon: MessageCircle },
-  { label: "Dictionary", icon: Search },
+  { label: "Dictionary", icon: Search, href: "https://ozituma.com/" },
   { label: "Profile", icon: UserRound },
 ] as const;
 
