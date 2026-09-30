@@ -100,10 +100,10 @@ export function ProfileView() {
         <div className="mt-4 space-y-5">
           <Toggle label="Dark theme" on={settings.theme === "dark"} set={(v) => setS("theme", v ? "dark" : "light")} />
           <label className="block text-sm font-bold">Text size
-            <div className="mt-2 flex gap-2">{(["normal", "large", "xlarge"] as const).map((s) => <Button key={s} variant={settings.textSize === s ? "default" : "secondary"} onClick={() => setS("textSize", s)}>{s === "normal" ? "A" : s === "large" ? "A+" : "A++"}</Button>)}</div>
+            <div className="mt-2 flex gap-2">{(["normal", "large", "xlarge"] as const).map((s) => <Button key={s} variant={settings.textSize === s ? "primary" : "secondary"} onClick={() => setS("textSize", s)}>{s === "normal" ? "A" : s === "large" ? "A+" : "A++"}</Button>)}</div>
           </label>
           <label className="block text-sm font-bold">Audio speed
-            <div className="mt-2 flex gap-2">{([0.75, 1, 1.25] as const).map((s) => <Button key={s} variant={settings.audioSpeed === s ? "default" : "secondary"} onClick={() => setS("audioSpeed", s)}>{s}×</Button>)}</div>
+            <div className="mt-2 flex gap-2">{([0.75, 1, 1.25] as const).map((s) => <Button key={s} variant={settings.audioSpeed === s ? "primary" : "secondary"} onClick={() => setS("audioSpeed", s)}>{s}×</Button>)}</div>
           </label>
           <Toggle label="Reduce motion" on={settings.reducedMotion} set={(v) => setS("reducedMotion", v)} />
           <Toggle label="Show culture notes" on={settings.cultureNotes} set={(v) => setS("cultureNotes", v)} />
