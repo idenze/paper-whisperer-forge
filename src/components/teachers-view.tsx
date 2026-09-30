@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, BadgeCheck, Building2, CalendarPlus, GraduationCap, Search, Star } from "lucide-react";
+import { ArrowLeft, BadgeCheck, BookOpen, Building2, CalendarPlus, Clock3, GraduationCap, MessageCircle, Play, Search, SlidersHorizontal, Star, UsersRound, Video } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/button";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/lib/use-auth";
-import { sampleRatings, sampleReviews, sampleTeachers } from "@/lib/teacher-samples";
+import { sampleRatings, sampleReviews, sampleTeacherDetails, sampleTeachers } from "@/lib/teacher-samples";
 import { SampleBanner, SampleDashboards, type SampleRole } from "@/components/teachers-samples-view";
 
 type Teacher = Tables<"teacher_profiles">;
@@ -29,7 +29,7 @@ export function TeachersView() {
       supabase.from("teacher_ratings").select("*"),
     ]);
     setTeachers(t ?? []);
-    setRatings(Object.fromEntries((r ?? []).map((x) => [x.teacher_id!, x])));
+    setRatings(Object.fromEntries((r ?? []).filter((x) => x.teacher_id).map((x) => [x.teacher_id as string, x])));
   }, []);
   useEffect(() => { void load(); }, [load, auth.user]);
 
@@ -53,17 +53,21 @@ export function TeachersView() {
 
   return (
     <div className="rise-in">
-      <section className="overflow-hidden rounded-lg bg-brand p-6 text-brand-foreground shadow-lg sm:p-9">
-        <p className="text-xs font-extrabold uppercase opacity-80">Live teachers</p>
-        <h1 className="mt-2 max-w-2xl font-display text-4xl font-semibold leading-tight sm:text-5xl">Learn Igbo face to face with a real teacher.</h1>
-        <p className="mt-3 max-w-xl opacity-85">Book one-to-one video lessons, or — for schools — hire a qualified Igbo teacher based on reviews and credentials.</p>
-        <div className="mt-6 flex flex-wrap gap-2">
+      <section className="teacher-market-head overflow-hidden rounded-lg border border-border bg-card p-5 shadow-sm sm:p-7">
+        <div className="grid items-end gap-5 md:grid-cols-[minmax(0,1fr)_auto]">
+          <div>
+            <p className="text-xs font-extrabold uppercase text-primary">Ozituma live teachers</p>
+            <h1 className="mt-2 max-w-2xl font-display text-3xl font-semibold leading-tight sm:text-4xl">Find an Igbo teacher who fits your goals.</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Compare real teaching styles, credentials, reviews and availability before you book a one-to-one video lesson.</p>
+          </div>
+          <div className="flex flex-wrap gap-2 md:justify-end">
           <Button variant="secondary" onClick={() => setScreen({ name: "teach" })} disabled={!auth.user}><GraduationCap className="size-4" /> {mine ? "Edit my teacher profile" : "Teach on Ozituma"}</Button>
-          {auth.user ? <Button variant="secondary" onClick={() => setScreen({ name: "mine" })}><CalendarPlus className="size-4" /> My lessons</Button>
-            : <Button asChild variant="secondary"><Link to="/auth">Sign in to book or teach</Link></Button>}
+            {auth.user ? <Button onClick={() => setScreen({ name: "mine" })}><CalendarPlus className="size-4" /> My lessons</Button>
+              : <Button asChild><Link to="/auth">Sign in to book</Link></Button>}
+          </div>
         </div>
-        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-brand-foreground/20 pt-4">
-          <span className="text-xs font-extrabold uppercase opacity-80">Preview samples:</span>
+        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+          <span className="text-xs font-extrabold uppercase text-muted-foreground">Explore sample pages:</span>
           <Button variant="secondary" onClick={() => setScreen({ name: "samples", role: "teacher" })}>Teacher dashboard</Button>
           <Button variant="secondary" onClick={() => setScreen({ name: "samples", role: "learner" })}>Learner page</Button>
           <Button variant="secondary" onClick={() => setScreen({ name: "samples", role: "school" })}>School page</Button>
@@ -85,9 +89,10 @@ export function TeachersView() {
         </section>
       )}
 
-      <div className="mt-7 flex flex-wrap items-center gap-3">
-        <div className="relative min-w-64 flex-1"><Search className="absolute left-3 top-3 size-4 text-muted-foreground" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name, dialect or speciality (e.g. children, exams)" className={`${input} pl-9`} /></div>
-        <label className="flex items-center gap-2 text-sm font-bold"><input type="checkbox" checked={schoolsOnly} onChange={(e) => setSchoolsOnly(e.target.checked)} className="size-4 accent-primary" /><Building2 className="size-4" /> Open to schools</label>
+      <div className="mt-6 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3 shadow-sm">
+        <div className="relative min-w-64 flex-1"><Search className="absolute left-3 top-3 size-4 text-muted-foreground" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search teachers, dialects or goals" className={`${input} border-0 bg-muted pl-9`} /></div>
+        <label className="flex items-center gap-2 rounded-md border border-border px-3 py-2.5 text-sm font-bold"><input type="checkbox" checked={schoolsOnly} onChange={(e) => setSchoolsOnly(e.target.checked)} className="size-4 accent-primary" /><Building2 className="size-4" /> Open to schools</label>
+        <Button variant="secondary" title="More filters coming with real teacher availability"><SlidersHorizontal className="size-4" /> Filters</Button>
       </div>
 
       {showingSamples && <div className="mt-6"><SampleBanner /></div>}
@@ -98,7 +103,7 @@ export function TeachersView() {
           <p className="mt-1 text-sm text-muted-foreground">Teachers appear here once Ozituma staff approve their application.</p>
         </div>
       ) : (
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
           {list.map((t) => <TeacherCard key={t.id} t={t} rating={allRatings[t.id]} onOpen={() => setScreen({ name: "profile", id: t.id })} />)}
         </div>
       )}
@@ -112,18 +117,43 @@ function Stars({ rating }: { rating?: Rating | undefined }) {
 }
 
 function Avatar({ t, size = "size-14" }: { t: Teacher; size?: string }) {
-  return t.photo_url ? <img src={t.photo_url} alt="" className={`${size} rounded-full object-cover`} />
+  return t.photo_url ? <img src={t.photo_url} alt={`Portrait of ${t.display_name}`} width={768} height={960} loading="lazy" className={`${size} rounded-full object-cover`} />
     : <div className={`${size} grid place-items-center rounded-full bg-secondary font-display text-xl font-semibold text-secondary-foreground`}>{t.display_name.slice(0, 1)}</div>;
 }
 
 function TeacherCard({ t, rating, onOpen }: { t: Teacher; rating?: Rating | undefined; onOpen: () => void }) {
+  const detail = sampleTeacherDetails[t.id];
+  const isSample = t.id.startsWith("sample-");
   return (
-    <button onClick={onOpen} className="group flex flex-col rounded-lg border border-border bg-card p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md">
-      <div className="flex items-center gap-3"><Avatar t={t} /><div className="min-w-0"><p className="flex items-center gap-1 font-display text-lg font-semibold">{t.display_name}<BadgeCheck className="size-4 text-primary" /></p><Stars rating={rating} /></div></div>
-      <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{t.headline}</p>
-      <div className="mt-3 flex flex-wrap gap-1">{[...t.dialects, ...t.specialties].slice(0, 4).map((s) => <span key={s} className="rounded-sm bg-muted px-2 py-0.5 text-[11px] font-bold">{s}</span>)}</div>
-      <div className="mt-auto flex items-end justify-between pt-4"><p><span className="text-lg font-black">{money(t.hourly_rate_kobo, t.currency)}</span><span className="text-xs text-muted-foreground"> / hour</span></p>{t.open_to_schools && <span className="flex items-center gap-1 text-[11px] font-bold text-primary"><Building2 className="size-3.5" />Schools</span>}</div>
-    </button>
+    <article className="group overflow-hidden rounded-lg border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md sm:p-5">
+      <div className="flex gap-4">
+        <button onClick={onOpen} aria-label={`View ${t.display_name}'s introduction`} className="relative h-32 w-28 shrink-0 overflow-hidden rounded-md bg-muted sm:h-36 sm:w-32">
+          {t.photo_url ? <img src={t.photo_url} alt={`Portrait of ${t.display_name}`} width={768} height={960} loading="lazy" className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" /> : <Avatar t={t} size="size-full" />}
+          <span className="absolute inset-0 bg-ink/10" />
+          <span className="absolute inset-0 grid place-items-center"><span className="grid size-10 place-items-center rounded-full bg-card/95 text-primary shadow-lg"><Play className="ml-0.5 size-4" fill="currentColor" /></span></span>
+          <span className="absolute bottom-2 left-2 rounded-sm bg-ink/85 px-1.5 py-0.5 text-[9px] font-black uppercase text-brand-foreground">{t.video_url ? "Video" : "Profile"}</span>
+        </button>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0"><h2 className="flex items-center gap-1 font-display text-lg font-semibold leading-tight">{t.display_name}<BadgeCheck className="size-4 shrink-0 text-primary" /></h2><div className="mt-1"><Stars rating={rating} /></div></div>
+            <p className="shrink-0 text-right"><span className="block text-lg font-black">{money(t.hourly_rate_kobo, t.currency)}</span><span className="block text-[10px] font-bold uppercase text-muted-foreground">per hour</span></p>
+          </div>
+          <p className="mt-2 line-clamp-2 text-sm font-semibold leading-5">{t.headline}</p>
+          <div className="mt-2 flex flex-wrap gap-1">{[...t.dialects, ...t.specialties].slice(0, 4).map((s) => <span key={s} className="rounded-sm border border-border bg-muted px-2 py-0.5 text-[10px] font-bold">{s}</span>)}</div>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 border-t border-border pt-3 text-xs font-bold text-muted-foreground">
+        <span className="flex items-center gap-1.5"><BookOpen className="size-3.5" />{detail?.lessons ?? 0} lessons</span>
+        <span className="flex items-center gap-1.5"><UsersRound className="size-3.5" />{detail?.students ?? 0} learners</span>
+        <span className="flex items-center gap-1.5 text-primary"><Clock3 className="size-3.5" />{detail?.availability ?? "Ask for availability"}</span>
+      </div>
+      <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted-foreground">{t.bio}</p>
+      <div className="mt-4 flex gap-2">
+        <Button className="flex-1" onClick={onOpen}><CalendarPlus className="size-4" /> Book trial lesson</Button>
+        <Button variant="secondary" onClick={onOpen}><MessageCircle className="size-4" /> <span className="hidden sm:inline">View profile</span></Button>
+      </div>
+      {isSample && <p className="mt-3 text-[10px] font-black uppercase text-muted-foreground">Fictional sample teacher and media</p>}
+    </article>
   );
 }
 
@@ -152,12 +182,17 @@ function TeacherProfile({ t, rating, onBack }: { t: Teacher; rating?: Rating | u
       <Button variant="ghost" onClick={onBack}><ArrowLeft className="size-4" /> All teachers</Button>
       <div className="mt-4 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-5">
-          <section className="rounded-lg border border-border bg-card p-6">
-            <div className="flex flex-wrap items-center gap-4"><Avatar t={t} size="size-20" /><div><h1 className="font-display text-3xl font-semibold">{t.display_name}</h1><p className="text-muted-foreground">{t.headline}</p><div className="mt-1"><Stars rating={rating} /></div></div></div>
+          <section className="overflow-hidden rounded-lg border border-border bg-card">
+            <div className="relative aspect-video bg-muted">
+              {t.video_url ? <video src={t.video_url} poster={t.photo_url ?? undefined} controls playsInline preload="metadata" className="h-full w-full object-cover" aria-label={`${t.display_name} introduction video`} /> : t.photo_url ? <img src={t.photo_url} alt={`Portrait of ${t.display_name}`} width={768} height={960} className="h-full w-full object-cover object-[center_28%]" /> : <div className="grid h-full place-items-center"><Avatar t={t} size="size-28" /></div>}
+              <span className="absolute left-3 top-3 rounded-sm bg-ink/85 px-2 py-1 text-[10px] font-black uppercase text-brand-foreground">{isSample ? "Sample introduction" : "Teacher introduction"}</span>
+            </div>
+            <div className="p-6">
+              <div className="flex flex-wrap items-start justify-between gap-4"><div><h1 className="font-display text-3xl font-semibold">{t.display_name}</h1><p className="mt-1 text-muted-foreground">{t.headline}</p><div className="mt-2"><Stars rating={rating} /></div></div><div className="flex items-center gap-2 text-sm font-bold text-primary"><Video className="size-4" />1-to-1 video lessons</div></div>
             {isSample && <div className="mt-4"><SampleBanner /></div>}
             {t.status !== "approved" && <p className="mt-4 rounded-md bg-muted px-3 py-2 text-xs font-black uppercase">Awaiting approval · not visible to learners</p>}
             <p className="mt-5 whitespace-pre-line leading-7">{t.bio}</p>
-            {t.video_url && <a href={t.video_url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-sm font-bold text-primary underline">Watch intro video</a>}
+            </div>
           </section>
           <section className="grid gap-4 sm:grid-cols-2">
             <Info title="Qualifications" body={t.qualifications || "Not listed"} />
