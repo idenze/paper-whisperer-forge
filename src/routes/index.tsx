@@ -23,7 +23,6 @@ import { LessonFlow } from "@/components/lesson-flow";
 import { useStickyState } from "@/lib/use-sticky-state";
 import { PracticeView } from "@/components/practice-view";
 import { TutorView } from "@/components/tutor-view";
-import { lessonRounds } from "@/lib/practice-data";
 import { journey, learner, units } from "@/lib/learning-data";
 
 export const Route = createFileRoute("/")({
