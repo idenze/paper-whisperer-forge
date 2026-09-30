@@ -92,6 +92,7 @@ function Index() {
       </header>
 
       <main className="mx-auto max-w-[1440px] px-4 pb-28 pt-7 sm:px-6 lg:px-10 lg:pb-12 lg:pt-10">
+        {(activeTab === "Home" || activeTab === "Learn") && (
         <section className="rise-in mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div>
             <p className="mb-2 text-xs font-extrabold uppercase text-primary">Monday · Today’s journey</p>
@@ -106,6 +107,7 @@ function Index() {
             </div>
           </div>
         </section>
+        )}
 
         {activeTab === "Tutor" ? (
           <TutorView />
