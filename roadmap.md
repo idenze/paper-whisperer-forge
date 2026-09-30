@@ -29,3 +29,15 @@
 - [ ] Paystack checkout + webhook to set lesson_bookings.paid (needs Paystack secret key) — next agent
 - [ ] Video lesson room (e.g. Daily/Jitsi link per booking), teacher payouts via Paystack subaccounts/transfers — next agent
 - [x] Media-rich teacher discovery and profile preview with fictional portraits, sample introduction video, availability, lesson counts, and stronger booking actions
+
+## Coherent platform frontend
+- [ ] Phase 1–2: audit the existing product and consolidate reusable design-system patterns without replacing working learning flows
+- [ ] Phase 3: redesign the student and teacher dashboards around next actions, real backend state, and responsive layouts
+- [ ] Phase 4: refine teacher discovery and profiles; keep sample media explicitly labelled until approved profiles exist
+- [ ] Phase 5: build booking and calendar interfaces against DSH-provided availability and payment state
+- [ ] Phase 6: build responsive messaging interfaces against DSH-provided conversation contracts
+- [ ] Phase 7: build a provider-independent virtual classroom shell with teaching panels and connection states
+- [ ] Phase 8: add assignment, lesson-note, and progress interfaces backed by real learning data
+- [ ] Phase 9: add teacher earnings and transaction interfaces backed by DSH financial state
+- [ ] Phase 10: expand the staff area into a coherent admin interface for supported backend resources
+- [ ] Phase 11–12: complete mobile, accessibility, loading, empty, error, success, and unstable-connection polish
