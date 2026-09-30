@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/button";
 import { foldIgboText, normalizeIgboText } from "@/lib/igbo-text";
 import type { PracticeRound } from "@/lib/practice-data";
-import { clearSticky, useStickyState } from "@/lib/use-sticky-state";
+import { useStickyState } from "@/lib/use-sticky-state";
 
 type PracticeGameProps = {
   rounds: readonly PracticeRound[];
@@ -62,7 +62,6 @@ export function PracticeGame({ rounds, mode, heading, onClose, onComplete, stora
   const current = views[round] ?? views[0];
   const total = views.length;
   const checked = verdict !== null;
-  const started = round > 0 || checked;
 
   const exit = () => onClose();
 

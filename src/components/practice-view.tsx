@@ -4,17 +4,21 @@ import { Button } from "@/components/button";
 import { PracticeGame } from "@/components/practice-game";
 import { mixedRounds, practiceFocuses, type PracticeRound } from "@/lib/practice-data";
 import { learner } from "@/lib/learning-data";
+import { useStickyState } from "@/lib/use-sticky-state";
 
 type Session = { title: string; rounds: readonly PracticeRound[] };
 
 export function PracticeView() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [history, setHistory] = useState<string[]>([]);
+  const [sessionTitle, setSessionTitle] = useStickyState<string | null>("practise:session", null);
+  const [history, setHistory] = useStickyState<string[]>("practise:history", []);
+  const session: Session | null = sessionTitle === "Mixed run" ? { title: "Mixed run", rounds: mixedRounds }
+    : (() => { const f = practiceFocuses.find((x) => x.name === sessionTitle); return f ? { title: f.name, rounds: f.rounds } : null; })();
+  const setSession = (s: Session | null) => setSessionTitle(s ? s.title : null);
 
   const finish = (title: string) => setHistory((items) => [title, ...items.filter((item) => item !== title)].slice(0, 3));
 
   if (session) {
-    return <PracticeGame rounds={session.rounds} mode="free" heading={session.title} onClose={() => setSession(null)} onComplete={() => finish(session.title)} />;
+    return <PracticeGame rounds={session.rounds} mode="free" heading={session.title} storageKey={`practise:${session.title}`} onClose={() => setSession(null)} onComplete={() => finish(session.title)} />;
   }
 
   return (

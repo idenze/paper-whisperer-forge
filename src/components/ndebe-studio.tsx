@@ -1,5 +1,6 @@
 import { BookOpen, Calculator, Check, ChevronRight, Copy, Delete, Download, ExternalLink, Grid3X3, Hash, Keyboard, LayoutGrid, RotateCcw, Search, Sprout, Type } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useStickyState } from "@/lib/use-sticky-state";
 import { Button } from "@/components/button";
 import {
   arithmeticRules, bodyOf, catalogueCategories, catalogueGlyphs, catalogueTotal, flagOf, fontsRepo, keymanPackage, ndebeCredit, ndebeFonts, ndebeModules,
@@ -28,7 +29,7 @@ async function copy(text: string) {
 }
 
 export function NdebeStudio() {
-  const [workspace, setWorkspace] = useState<Workspace>("type");
+  const [workspace, setWorkspace] = useStickyState<Workspace>("ndebe:workspace", "type");
   return (
     <section className="rise-in" aria-label="Ndebe learning studio">
       <div className="mb-6 overflow-hidden rounded-lg bg-ink text-primary-foreground shadow-lg">
@@ -64,7 +65,7 @@ export function NdebeStudio() {
 
 function TypeWorkspace() {
   const [stem, setStem] = useState<string | null>(null);
-  const [tokens, setTokens] = useState<string[]>([]);
+  const [tokens, setTokens] = useStickyState<string[]>("ndebe:tokens", []);
   const [copied, setCopied] = useState(false);
   const [palette, setPalette] = useState<keyof typeof palettes | null>(null);
   const push = (t: string) => { setTokens((x) => [...x, t]); setCopied(false); };
