@@ -13,6 +13,10 @@ export function PracticeView() {
 
   const finish = (title: string) => setHistory((items) => [title, ...items.filter((item) => item !== title)].slice(0, 3));
 
+  if (session) {
+    return <PracticeGame rounds={session.rounds} mode="free" heading={session.title} onClose={() => setSession(null)} onComplete={() => finish(session.title)} />;
+  }
+
   return (
     <div className="rise-in">
       <section className="overflow-hidden rounded-lg bg-ink text-primary-foreground shadow-lg">
@@ -38,7 +42,7 @@ export function PracticeView() {
         <section aria-labelledby="focus-heading">
           <div className="mb-4">
             <p className="text-xs font-bold uppercase text-muted-foreground">Choose a focus</p>
-            <h2 id="focus-heading" className="mt-1 font-display text-2xl font-semibold">Four ways to warm up</h2>
+            <h2 id="focus-heading" className="mt-1 font-display text-2xl font-semibold">Five ways to warm up</h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {practiceFocuses.map(({ id, name, detail, minutes, icon: Icon, rounds }) => {
@@ -89,15 +93,6 @@ export function PracticeView() {
         </aside>
       </div>
 
-      {session ? (
-        <PracticeGame
-          rounds={session.rounds}
-          mode="free"
-          heading={session.title}
-          onClose={() => setSession(null)}
-          onComplete={() => finish(session.title)}
-        />
-      ) : null}
     </div>
   );
 }
