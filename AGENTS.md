@@ -12,3 +12,5 @@
 - Keep the learning experience data-driven so verified curriculum can replace demonstration data without screen rewrites.
 - Use TanStack file routes with a shared learner shell on the index experience; the project framework is fixed.
 - Normalize all language input to Unicode NFC and use diacritic-insensitive matching only as a search aid.
+- Keep Tutor answers as clearly labelled interface samples until approved curriculum and audio are connected, because generated teaching claims must not be presented as verified.
+- Keep Ndebe input mapping and glyph output replaceable; use explicit prototype notation until the licensed font and verified mapping data are supplied.

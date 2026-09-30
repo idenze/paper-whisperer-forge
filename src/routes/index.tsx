@@ -10,6 +10,7 @@ import {
   MessageCircle,
   Search,
   Sparkles,
+  SquarePen,
   Trophy,
   UserRound,
   Volume2,
@@ -17,7 +18,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/button";
+import { NdebeStudio } from "@/components/ndebe-studio";
 import { OzitumaMark } from "@/components/ozituma-mark";
+import { TutorView } from "@/components/tutor-view";
 import { journey, learner, units } from "@/lib/learning-data";
 
 export const Route = createFileRoute("/")({
@@ -34,13 +37,14 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Tab = "Home" | "Learn" | "Tutor" | "Profile";
+type Tab = "Home" | "Learn" | "Tutor" | "Ndebe" | "Profile";
 
 const navItems = [
   { label: "Home", icon: Home },
   { label: "Learn", icon: BookOpen },
   { label: "Practise", icon: Sparkles, href: "https://ozituma.com/practice" },
   { label: "Tutor", icon: MessageCircle },
+  { label: "Ndebe", icon: SquarePen },
   { label: "Dictionary", icon: Search, href: "https://ozituma.com/" },
   { label: "Profile", icon: UserRound },
 ] as const;
@@ -102,7 +106,11 @@ function Index() {
           </div>
         </section>
 
-        {activeTab !== "Home" && activeTab !== "Learn" ? (
+        {activeTab === "Tutor" ? (
+          <TutorView />
+        ) : activeTab === "Ndebe" ? (
+          <NdebeStudio />
+        ) : activeTab !== "Home" && activeTab !== "Learn" ? (
           <ComingSoon tab={activeTab} onBack={() => setActiveTab("Home")} />
         ) : (
           <div className="grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -180,8 +188,8 @@ function Index() {
         )}
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-lg lg:hidden" aria-label="Mobile navigation">
-        {navItems.slice(0, 5).map(({ label, icon: Icon, ...item }) =>
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-card px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-lg lg:hidden" aria-label="Mobile navigation">
+        {navItems.slice(0, 6).map(({ label, icon: Icon, ...item }) =>
           "href" in item ? (
             <a key={label} href={item.href} target="_blank" rel="noopener noreferrer" className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-bold text-muted-foreground"><Icon className="size-5" />{label}</a>
           ) : (
