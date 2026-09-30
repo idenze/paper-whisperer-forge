@@ -14,16 +14,340 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: number
+          new_status: string | null
+          record_id: string | null
+          table_name: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: never
+          new_status?: string | null
+          record_id?: string | null
+          table_name: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: never
+          new_status?: string | null
+          record_id?: string | null
+          table_name?: string
+        }
+        Relationships: []
+      }
+      course_lessons: {
+        Row: {
+          author_id: string | null
+          cards: Json
+          change_note: string | null
+          created_at: string
+          culture_note: string
+          culture_source: string | null
+          id: string
+          objective: string
+          position: number
+          reviewer_id: string | null
+          scene: string
+          slug: string
+          status: Database["public"]["Enums"]["content_status"]
+          story: Json
+          title: string
+          unit_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          cards?: Json
+          change_note?: string | null
+          created_at?: string
+          culture_note?: string
+          culture_source?: string | null
+          id?: string
+          objective?: string
+          position?: number
+          reviewer_id?: string | null
+          scene?: string
+          slug: string
+          status?: Database["public"]["Enums"]["content_status"]
+          story?: Json
+          title: string
+          unit_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          cards?: Json
+          change_note?: string | null
+          created_at?: string
+          culture_note?: string
+          culture_source?: string | null
+          id?: string
+          objective?: string
+          position?: number
+          reviewer_id?: string | null
+          scene?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["content_status"]
+          story?: Json
+          title?: string
+          unit_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lessons_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "course_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_units: {
+        Row: {
+          author_id: string | null
+          change_note: string | null
+          created_at: string
+          id: string
+          level: number
+          position: number
+          reviewer_id: string | null
+          status: Database["public"]["Enums"]["content_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          change_note?: string | null
+          created_at?: string
+          id?: string
+          level?: number
+          position?: number
+          reviewer_id?: string | null
+          status?: Database["public"]["Enums"]["content_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          change_note?: string | null
+          created_at?: string
+          id?: string
+          level?: number
+          position?: number
+          reviewer_id?: string | null
+          status?: Database["public"]["Enums"]["content_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      error_reports: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          resolved: boolean
+          target_id: string | null
+          target_type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          resolved?: boolean
+          target_id?: string | null
+          target_type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          resolved?: boolean
+          target_id?: string | null
+          target_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      lesson_progress: {
+        Row: {
+          completed_at: string | null
+          lesson_key: string
+          state: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          lesson_key: string
+          state?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          lesson_key?: string
+          state?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lexemes: {
+        Row: {
+          ai_generated: boolean
+          audio_url: string | null
+          author_id: string | null
+          change_note: string | null
+          created_at: string
+          dialect: string | null
+          example_en: string | null
+          example_ig: string | null
+          headword: string
+          id: string
+          meaning: string
+          part_of_speech: string | null
+          reviewer_id: string | null
+          search_key: string
+          source: string | null
+          status: Database["public"]["Enums"]["content_status"]
+          tone_marked: string | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          ai_generated?: boolean
+          audio_url?: string | null
+          author_id?: string | null
+          change_note?: string | null
+          created_at?: string
+          dialect?: string | null
+          example_en?: string | null
+          example_ig?: string | null
+          headword: string
+          id?: string
+          meaning: string
+          part_of_speech?: string | null
+          reviewer_id?: string | null
+          search_key?: string
+          source?: string | null
+          status?: Database["public"]["Enums"]["content_status"]
+          tone_marked?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          ai_generated?: boolean
+          audio_url?: string | null
+          author_id?: string | null
+          change_note?: string | null
+          created_at?: string
+          dialect?: string | null
+          example_en?: string | null
+          example_ig?: string | null
+          headword?: string
+          id?: string
+          meaning?: string
+          part_of_speech?: string | null
+          reviewer_id?: string | null
+          search_key?: string
+          source?: string | null
+          status?: Database["public"]["Enums"]["content_status"]
+          tone_marked?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          daily_goal_minutes: number
+          display_name: string | null
+          id: string
+          is_adult: boolean
+          learning_reason: string | null
+          native_language: string | null
+          onboarded: boolean
+          settings: Json
+          starting_level: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_goal_minutes?: number
+          display_name?: string | null
+          id: string
+          is_adult?: boolean
+          learning_reason?: string | null
+          native_language?: string | null
+          onboarded?: boolean
+          settings?: Json
+          starting_level?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_goal_minutes?: number
+          display_name?: string | null
+          id?: string
+          is_adult?: boolean
+          learning_reason?: string | null
+          native_language?: string | null
+          onboarded?: boolean
+          settings?: Json
+          starting_level?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "linguist" | "editor"
+      content_status: "draft" | "in_review" | "published" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +474,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "linguist", "editor"],
+      content_status: ["draft", "in_review", "published", "rejected"],
+    },
   },
 } as const
