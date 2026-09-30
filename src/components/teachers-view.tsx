@@ -52,7 +52,7 @@ export function TeachersView() {
         <h1 className="mt-2 max-w-2xl font-display text-4xl font-semibold leading-tight sm:text-5xl">Learn Igbo face to face with a real teacher.</h1>
         <p className="mt-3 max-w-xl opacity-85">Book one-to-one video lessons, or — for schools — hire a qualified Igbo teacher based on reviews and credentials.</p>
         <div className="mt-6 flex flex-wrap gap-2">
-          <Button variant="secondary" onClick={() => setScreen({ name: auth.user ? "teach" : "browse" })} disabled={!auth.user}><GraduationCap className="size-4" /> {mine ? "Edit my teacher profile" : "Teach on Ozituma"}</Button>
+          <Button variant="secondary" onClick={() => setScreen({ name: "teach" })} disabled={!auth.user}><GraduationCap className="size-4" /> {mine ? "Edit my teacher profile" : "Teach on Ozituma"}</Button>
           {auth.user ? <Button variant="secondary" onClick={() => setScreen({ name: "mine" })}><CalendarPlus className="size-4" /> My lessons</Button>
             : <Button asChild variant="secondary"><Link to="/auth">Sign in to book or teach</Link></Button>}
         </div>
