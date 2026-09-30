@@ -10,3 +10,5 @@
 - [x] Typing practice (meaning → type Igbo, tone-mark check) and in-page practice with clear exit
 - [ ] Connect verified Ozituma curriculum, dictionary, audio, Ndebe font, and input mappings (owner-supplied content required).- [x] Resume where learner stopped in every section (lessons, practise, Ndebe) — saved on device
 - [x] Give the lesson ("Continue learning / Greetings") its own format, distinct from Practise
+- [x] All lessons in the path playable (7 placeholder lessons, unlock in order, replay, next lesson, culture note)
+- [x] HANDOFF.md with gaps, rules and agent prompt
