@@ -98,14 +98,8 @@ function Index() {
         <div className="mx-auto flex h-18 max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-10">
           <OzitumaMark />
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
-            {navItems.map(({ label, icon: Icon, ...item }) =>
-              "href" in item ? (
-                <Button key={label} asChild variant="ghost">
-                  <a href={item.href} target="_blank" rel="noopener noreferrer">
-                    <Icon className="size-4" /> {label}
-                  </a>
-                </Button>
-              ) : (
+            {navItems.map(({ label, icon: Icon }) =>
+              false ? null : (
                 <Button key={label} variant="ghost" onClick={() => setActiveTab(label as Tab)} aria-current={activeTab === label ? "page" : undefined} className={activeTab === label ? "bg-secondary text-secondary-foreground" : ""}>
                   <Icon className="size-4" /> {label}
                 </Button>
