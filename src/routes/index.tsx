@@ -4,7 +4,6 @@ import {
   BookOpen,
   Check,
   ChevronRight,
-  Flame,
   Home,
   Keyboard,
   ShieldCheck,
@@ -38,6 +37,7 @@ import { StaffView } from "@/components/staff-view";
 import { KeyboardView } from "@/components/keyboard-view";
 import { TeachersView } from "@/components/teachers-view";
 import { applySettings, defaultSettings, type LearnerSettings } from "@/lib/settings";
+import { Eyebrow, StatusBadge } from "@/components/product-ui";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -90,6 +90,9 @@ function Index() {
   const openLesson = allLessons.find((l) => l.id === openLessonId) ?? null;
   const lessonOpen = openLesson !== null;
   const currentLesson = allLessons.find((l) => !lessonsDone.includes(l.id)) ?? allLessons[0];
+  const completedLessonCount = allLessons.filter((lesson) => lessonsDone.includes(lesson.id)).length;
+  const courseProgress = allLessons.length ? Math.round((completedLessonCount / allLessons.length) * 100) : 0;
+  const displayName = auth.user?.user_metadata?.["full_name"] || auth.user?.email?.split("@")[0] || "Learner";
   const setLessonOpen = (v: boolean) => setOpenLessonId(v ? currentLesson?.id ?? null : null);
   const [completed, setCompleted] = useStickyState<string[]>("lesson:completed", []);
 
@@ -112,11 +115,6 @@ function Index() {
             )}
           </nav>
           <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-2 rounded-md border border-border bg-card px-3 py-2 sm:flex">
-              <Flame className="size-4 text-highlight" fill="currentColor" />
-              <span className="text-sm font-extrabold">{learner.streak}</span>
-              <span className="text-xs text-muted-foreground">day streak</span>
-            </div>
             {auth.isStaff && <Button variant="ghost" onClick={() => goTab("Staff")} className={activeTab === "Staff" ? "bg-secondary" : ""}><ShieldCheck className="size-4" /><span className="hidden sm:inline">Staff</span></Button>}
             {auth.user ? (
               <button onClick={() => goTab("Profile")} className="grid size-10 place-items-center rounded-full bg-ink text-sm font-black uppercase text-primary-foreground" aria-label="Profile and settings">{(auth.user.email ?? "?").slice(0, 2)}</button>
@@ -132,20 +130,18 @@ function Index() {
 
       <main className="mx-auto max-w-[1440px] px-4 pb-28 pt-7 sm:px-6 lg:px-10 lg:pb-12 lg:pt-10">
         {(activeTab === "Home" || activeTab === "Learn") && !lessonOpen && (
-        <section className="rise-in mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
-          <div>
-            <p className="mb-2 text-xs font-extrabold uppercase text-primary">Monday · Today’s journey</p>
-            <h1 className="font-display text-4xl font-semibold leading-tight sm:text-5xl">Nnọọ, {learner.name}.</h1>
-            <p className="mt-2 max-w-xl text-base text-muted-foreground">A little every day goes a long way. You have four short activities waiting.</p>
-          </div>
-          <div className="flex min-w-64 items-center gap-4 rounded-md border border-border bg-card px-4 py-3 shadow-sm">
-            <div className="grid size-12 place-items-center rounded-full bg-secondary text-sm font-black text-secondary-foreground">L{learner.level}</div>
-            <div className="flex-1">
-              <div className="flex justify-between text-xs font-bold"><span>Level {learner.level}</span><span>{learner.xp.toLocaleString()} XP</span></div>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full w-[62%] rounded-full bg-highlight" /></div>
+          <section className="rise-in mb-7 flex flex-col justify-between gap-4 border-b border-border pb-6 md:flex-row md:items-end">
+            <div>
+              <Eyebrow>{activeTab === "Home" ? "Today’s learning" : "Your course"}</Eyebrow>
+              <h1 className="mt-2 font-display text-4xl font-semibold leading-tight sm:text-5xl">Nnọọ, {displayName}.</h1>
+              <p className="mt-2 max-w-xl text-base leading-7 text-muted-foreground">Continue from where you stopped, one clear step at a time.</p>
             </div>
-          </div>
-        </section>
+            <div className="min-w-64">
+              <div className="flex items-end justify-between gap-5 text-sm"><span className="font-bold">Course progress</span><span className="font-black text-primary">{courseProgress}%</span></div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted" aria-label={`${courseProgress}% of available lessons completed`}><div className="h-full rounded-full bg-highlight transition-all" style={{ width: `${courseProgress}%` }} /></div>
+              <p className="mt-2 text-xs text-muted-foreground">{completedLessonCount} of {allLessons.length} available lessons completed</p>
+            </div>
+          </section>
         )}
 
         {openLesson ? (
@@ -174,18 +170,19 @@ function Index() {
               {activeTab === "Home" && (
                 <>
                   <section className="rise-in-delay overflow-hidden rounded-lg bg-brand text-brand-foreground shadow-lg">
-                    <div className="grid md:grid-cols-[1fr_240px]">
+                    <div className="grid md:grid-cols-[1fr_220px]">
                       <div className="p-6 sm:p-8">
-                        <div className="mb-8 flex items-center gap-2 text-xs font-extrabold uppercase text-brand-foreground/75"><span className="h-px w-8 bg-highlight" /> Unit 1 · Lesson 2</div>
-                        <h2 className="font-display text-3xl font-semibold sm:text-4xl">Continue: Greetings</h2>
-                        <p className="mt-3 max-w-lg text-sm leading-6 text-brand-foreground/80">Pick up where you left off with a short listening and recognition exercise.</p>
-                        <Button className="mt-7 bg-highlight text-highlight-foreground hover:bg-highlight/90" onClick={() => setLessonOpen(true)}>
+                        <div className="flex flex-wrap items-center gap-2"><StatusBadge tone="warning">Next lesson</StatusBadge>{isDemo && <StatusBadge>Demo course</StatusBadge>}</div>
+                        <h2 className="mt-5 font-display text-3xl font-semibold sm:text-4xl">{currentLesson?.title ?? "Continue learning"}</h2>
+                        <p className="mt-3 max-w-lg text-sm leading-6 text-brand-foreground/80">Resume your guided lesson and keep your place across activities.</p>
+                        <div className="mt-6 flex items-center gap-3"><div className="h-1 flex-1 overflow-hidden rounded-full bg-brand-foreground/20"><div className="h-full w-1/4 rounded-full bg-highlight" /></div><span className="text-xs font-bold">Ready</span></div>
+                        <Button className="mt-6 w-full bg-highlight text-highlight-foreground hover:bg-highlight/90 sm:w-auto" onClick={() => setLessonOpen(true)}>
                           Continue lesson <ArrowRight className="size-4" />
                         </Button>
                       </div>
                       <div className="relative hidden overflow-hidden border-l border-brand-foreground/15 md:block" aria-hidden="true">
                         <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(30deg,transparent_35%,currentColor_36%,currentColor_38%,transparent_39%),linear-gradient(-30deg,transparent_35%,currentColor_36%,currentColor_38%,transparent_39%)] [background-size:42px_72px]" />
-                        <div className="absolute bottom-6 left-6 right-6 border-l-4 border-highlight pl-4 font-display text-2xl leading-tight">Learn it.<br />Live it.<br />Pass it on.</div>
+                        <div className="absolute bottom-6 left-6 right-6 border-l-4 border-highlight pl-4 font-display text-2xl leading-tight">One lesson.<br />One step.<br />Keep going.</div>
                       </div>
                     </div>
                   </section>
@@ -195,11 +192,12 @@ function Index() {
                       <div><p className="text-xs font-bold uppercase text-muted-foreground">Your plan</p><h2 id="journey-heading" className="mt-1 font-display text-2xl font-semibold">Today’s journey</h2></div>
                       <span className="text-sm font-bold text-primary">{learner.completedMinutes + completed.length * 2} / {learner.dailyGoal} min</span>
                     </div>
-                    <div className="grid gap-3 md:grid-cols-2">
+                    {isDemo && <p className="mb-3 text-xs text-muted-foreground">Preview plan · activity details are demonstration content until approved curriculum is published.</p>}
+                    <div className="divide-y divide-border overflow-hidden rounded-md border border-border bg-card shadow-sm">
                       {journey.map(({ id, title, detail, action, icon: Icon, tone }) => {
                         const isDone = completed.includes(id);
                         return (
-                          <article key={id} className="group flex min-h-32 items-center gap-4 rounded-md border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                          <article key={id} className="group flex min-h-24 items-center gap-4 p-4 transition hover:bg-muted/45 sm:px-5">
                             <div className={`grid size-12 shrink-0 place-items-center rounded-md ${tone === "green" ? "bg-primary text-primary-foreground" : tone === "coral" ? "bg-accent text-accent-foreground" : tone === "gold" ? "bg-secondary text-secondary-foreground" : "bg-ink text-primary-foreground"}`}><Icon className="size-5" /></div>
                             <div className="min-w-0 flex-1"><h3 className="font-bold">{title}</h3><p className="mt-1 text-sm text-muted-foreground">{detail}</p></div>
                             <Button variant={isDone ? "ghost" : "icon"} aria-label={`${action}: ${title}`} onClick={() => id === "continue" ? setLessonOpen(true) : markDone(id)}>
@@ -218,20 +216,17 @@ function Index() {
 
             <aside className="space-y-5 xl:sticky xl:top-26">
               <section className="rounded-md border border-border bg-card p-5 shadow-sm">
-                <div className="flex items-center justify-between"><h2 className="font-display text-xl font-semibold">Daily goal</h2><span className="text-xs font-extrabold text-primary">60%</span></div>
-                <div className="mt-5 flex items-center gap-5">
-                  <div className="relative grid size-24 place-items-center rounded-full" style={{ background: "conic-gradient(var(--color-primary) 60%, var(--color-muted) 0)" }}>
-                    <div className="grid size-[74px] place-items-center rounded-full bg-card text-center"><span><b className="block text-xl">9</b><small className="text-muted-foreground">minutes</small></span></div>
-                  </div>
-                  <div><p className="font-bold">6 minutes to go</p><p className="mt-1 text-sm leading-5 text-muted-foreground">Finish one more activity to reach today’s goal.</p></div>
+                <div className="flex items-center justify-between"><h2 className="font-display text-xl font-semibold">Learning record</h2><StatusBadge tone="positive">On this device</StatusBadge></div>
+                <div className="mt-5 grid grid-cols-2 gap-4">
+                  <div><p className="text-2xl font-black">{completedLessonCount}</p><p className="text-xs text-muted-foreground">Lessons completed</p></div>
+                  <div><p className="text-2xl font-black">{completed.length}</p><p className="text-xs text-muted-foreground">Activities today</p></div>
                 </div>
+                <p className="mt-4 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">Sign in to keep completed lessons available across your devices.</p>
               </section>
 
               <section className="rounded-md border border-border bg-secondary p-5">
-                <div className="flex items-start gap-3"><Trophy className="mt-0.5 size-5 text-highlight-foreground" /><div><p className="text-xs font-extrabold uppercase text-muted-foreground">Weekly rhythm</p><h2 className="mt-1 font-display text-xl font-semibold">Five active days</h2></div></div>
-                <div className="mt-5 grid grid-cols-7 gap-1.5 text-center text-[10px] font-bold text-muted-foreground">
-                  {"MTWTFSS".split("").map((day, index) => <div key={`${day}-${index}`}><span className={`mx-auto mb-2 grid size-7 place-items-center rounded-full ${index < 5 ? "bg-primary text-primary-foreground" : "bg-card"}`}>{index < 5 ? <Check className="size-3" /> : day}</span>{day}</div>)}
-                </div>
+                <div className="flex items-start gap-3"><Trophy className="mt-0.5 size-5 text-highlight-foreground" /><div><p className="text-xs font-extrabold uppercase text-muted-foreground">Next milestone</p><h2 className="mt-1 font-display text-xl font-semibold">Complete this unit</h2></div></div>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">Finish the available lessons in order to unlock the next part of your path.</p>
               </section>
 
               <section className="rounded-md border border-border bg-card p-5">
@@ -244,10 +239,10 @@ function Index() {
         )}
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-8 border-t border-border bg-card px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-lg lg:hidden" aria-label="Mobile navigation">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex gap-1 overflow-x-auto border-t border-border bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-lg lg:hidden" aria-label="Mobile navigation">
         {navItems.map(({ label, icon: Icon, ...item }) =>
           (
-            <button key={label} onClick={() => goTab(label as Tab)} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-bold ${activeTab === label ? "text-primary" : "text-muted-foreground"}`}><Icon className="size-5" />{label}</button>
+            <button key={label} onClick={() => goTab(label as Tab)} className={`flex min-h-14 min-w-[4.25rem] flex-1 flex-col items-center justify-center gap-1 rounded-md px-1 text-[10px] font-bold ${activeTab === label ? "bg-secondary text-primary" : "text-muted-foreground"}`}><Icon className="size-5" />{label}</button>
           )
         )}
       </nav>

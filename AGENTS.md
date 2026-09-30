@@ -20,3 +20,4 @@
 - Learner place is saved per device via useStickyState (localStorage, `ozituma:` prefix) until accounts sync progress server-side.
 - Teacher discovery is media-first: profiles support portrait and introduction-video URLs, while fictional preview media stays explicitly labelled as sample content.
 - Frontend owns presentation and interaction only; consume DSH-owned auth, booking, payment, earnings, video, and permission state without recreating business logic.
+- The product UI follows a serene heritage editorial direction: calm hierarchy, one dominant next action, restrained cultural texture, and limited card repetition.
