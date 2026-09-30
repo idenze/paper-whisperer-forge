@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   BookOpen,
@@ -6,6 +6,8 @@ import {
   ChevronRight,
   Flame,
   Home,
+  Keyboard,
+  ShieldCheck,
   LockKeyhole,
   MessageCircle,
   Search,
@@ -24,7 +26,16 @@ import { useStickyState } from "@/lib/use-sticky-state";
 import { PracticeView } from "@/components/practice-view";
 import { TutorView } from "@/components/tutor-view";
 import { journey, learner } from "@/lib/learning-data";
-import { allLessons, findLesson, lessonStatus, units } from "@/lib/lesson-data";
+import { lessonStatus, type Unit } from "@/lib/lesson-data";
+import { useCourse } from "@/lib/use-course";
+import { useAuth } from "@/lib/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
+import { DictionaryView } from "@/components/dictionary-view";
+import { ProfileView } from "@/components/profile-view";
+import { StaffView } from "@/components/staff-view";
+import { KeyboardView } from "@/components/keyboard-view";
+import { applySettings, defaultSettings, type LearnerSettings } from "@/lib/settings";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,7 +51,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Tab = "Home" | "Learn" | "Practise" | "Tutor" | "Ndebe" | "Profile";
+type Tab = "Home" | "Learn" | "Practise" | "Tutor" | "Ndebe" | "Keyboard" | "Dictionary" | "Profile" | "Staff";
 
 const navItems = [
   { label: "Home", icon: Home },
@@ -48,15 +59,30 @@ const navItems = [
   { label: "Practise", icon: Sparkles },
   { label: "Tutor", icon: MessageCircle },
   { label: "Ndebe", icon: SquarePen },
-  { label: "Dictionary", icon: Search, href: "https://ozituma.com/" },
-  { label: "Profile", icon: UserRound },
+  { label: "Keyboard", icon: Keyboard },
+  { label: "Dictionary", icon: Search },
 ] as const;
 
 function Index() {
   const [activeTab, setActiveTab] = useStickyState<Tab>("tab", "Home");
   const [openLessonId, setOpenLessonId] = useStickyState<string | null>("lesson:openId", null);
   const [lessonsDone, setLessonsDone] = useStickyState<string[]>("lesson:done", ["welcome"]);
-  const openLesson = findLesson(openLessonId);
+  const { units, allLessons, isDemo } = useCourse();
+  const auth = useAuth();
+  const [settings] = useStickyState<LearnerSettings>("settings", defaultSettings);
+  useEffect(() => { applySettings(settings); }, [settings]);
+  // Signed-in learners: merge progress saved to their account, and save new completions.
+  useEffect(() => {
+    if (!auth.user) return;
+    supabase.from("lesson_progress").select("lesson_key,completed_at").eq("user_id", auth.user.id).then(({ data }) => {
+      const remote = (data ?? []).filter((r) => r.completed_at).map((r) => r.lesson_key);
+      if (remote.length) setLessonsDone((d) => Array.from(new Set([...d, ...remote])));
+    });
+  }, [auth.user, setLessonsDone]);
+  const saveCompletion = (key: string) => {
+    if (auth.user) supabase.from("lesson_progress").upsert({ user_id: auth.user.id, lesson_key: key, completed_at: new Date().toISOString() }).then(() => {});
+  };
+  const openLesson = allLessons.find((l) => l.id === openLessonId) ?? null;
   const lessonOpen = openLesson !== null;
   const currentLesson = allLessons.find((l) => !lessonsDone.includes(l.id)) ?? allLessons[0];
   const setLessonOpen = (v: boolean) => setOpenLessonId(v ? currentLesson?.id ?? null : null);
@@ -92,7 +118,15 @@ function Index() {
               <span className="text-sm font-extrabold">{learner.streak}</span>
               <span className="text-xs text-muted-foreground">day streak</span>
             </div>
-            <button className="grid size-10 place-items-center rounded-full bg-ink text-sm font-black text-primary-foreground" aria-label="Open profile">CE</button>
+            {auth.isStaff && <Button variant="ghost" onClick={() => setActiveTab("Staff")} className={activeTab === "Staff" ? "bg-secondary" : ""}><ShieldCheck className="size-4" /><span className="hidden sm:inline">Staff</span></Button>}
+            {auth.user ? (
+              <button onClick={() => setActiveTab("Profile")} className="grid size-10 place-items-center rounded-full bg-ink text-sm font-black uppercase text-primary-foreground" aria-label="Profile and settings">{(auth.user.email ?? "?").slice(0, 2)}</button>
+            ) : (
+              <div className="flex items-center gap-1">
+                <Button variant="icon" onClick={() => setActiveTab("Profile")} aria-label="Settings"><UserRound className="size-5" /></Button>
+                <Button asChild><Link to="/auth">Sign in</Link></Button>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -117,7 +151,7 @@ function Index() {
 
         {openLesson ? (
           <LessonFlow key={openLesson.id} lesson={openLesson} onClose={() => setOpenLessonId(null)}
-            onComplete={() => { markDone("continue"); setLessonsDone((d) => d.includes(openLesson.id) ? d : [...d, openLesson.id]); }}
+            onComplete={() => { markDone("continue"); setLessonsDone((d) => d.includes(openLesson.id) ? d : [...d, openLesson.id]); saveCompletion(openLesson.id); }}
             onNext={(() => { const i = allLessons.findIndex((l) => l.id === openLesson.id); const nx = allLessons[i + 1]; return nx ? () => setOpenLessonId(nx.id) : undefined; })()} />
         ) : activeTab === "Tutor" ? (
           <TutorView />
@@ -125,8 +159,14 @@ function Index() {
           <PracticeView />
         ) : activeTab === "Ndebe" ? (
           <NdebeStudio />
-        ) : activeTab !== "Home" && activeTab !== "Learn" ? (
-          <ComingSoon tab={activeTab} onBack={() => setActiveTab("Home")} />
+        ) : activeTab === "Keyboard" ? (
+          <KeyboardView />
+        ) : activeTab === "Dictionary" ? (
+          <DictionaryView />
+        ) : activeTab === "Profile" ? (
+          <ProfileView />
+        ) : activeTab === "Staff" ? (
+          <StaffView />
         ) : (
           <div className="grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_340px]">
             <div className="space-y-8">
@@ -172,7 +212,7 @@ function Index() {
                 </>
               )}
 
-              <CoursePath completed={lessonsDone} onOpen={(id) => setOpenLessonId(id)} expanded={activeTab === "Learn"} />
+              <CoursePath units={units} isDemo={isDemo} completed={lessonsDone} onOpen={(id) => setOpenLessonId(id)} expanded={activeTab === "Learn"} />
             </div>
 
             <aside className="space-y-5 xl:sticky xl:top-26">
@@ -203,8 +243,8 @@ function Index() {
         )}
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-card px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-lg lg:hidden" aria-label="Mobile navigation">
-        {navItems.slice(0, 6).map(({ label, icon: Icon, ...item }) =>
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-7 border-t border-border bg-card px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-lg lg:hidden" aria-label="Mobile navigation">
+        {navItems.map(({ label, icon: Icon, ...item }) =>
           "href" in item ? (
             <a key={label} href={item.href} target="_blank" rel="noopener noreferrer" className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-bold text-muted-foreground"><Icon className="size-5" />{label}</a>
           ) : (
@@ -217,15 +257,15 @@ function Index() {
   );
 }
 
-function CoursePath({ completed, onOpen, expanded }: { completed: string[]; onOpen: (id: string) => void; expanded: boolean }) {
+function CoursePath({ units, isDemo, completed, onOpen, expanded }: { units: readonly Unit[]; isDemo: boolean; completed: string[]; onOpen: (id: string) => void; expanded: boolean }) {
   return (
     <section aria-labelledby="path-heading" className={expanded ? "pt-1" : ""}>
-      <div className="mb-4"><p className="text-xs font-bold uppercase text-muted-foreground">Level 0 · Foundations</p><h2 id="path-heading" className="mt-1 font-display text-2xl font-semibold">Your learning path</h2></div>
+      <div className="mb-4"><p className="text-xs font-bold uppercase text-muted-foreground">Level 0 · Foundations{isDemo ? " · Demo course" : ""}</p><h2 id="path-heading" className="mt-1 font-display text-2xl font-semibold">Your learning path</h2></div>
       <div className="space-y-3">
         {units.map((unit) => {
           const done = unit.lessons.filter((l) => completed.includes(l.id)).length;
           const progress = Math.round((done / unit.lessons.length) * 100);
-          const unitOpen = unit.lessons.some((l) => lessonStatus(l.id, completed) !== "locked");
+          const unitOpen = unit.lessons.some((l) => lessonStatus(l.id, completed, units.flatMap((u) => u.lessons)) !== "locked");
           return <article key={unit.number} className="rounded-md border border-border bg-card p-5 shadow-sm">
           <div className="flex items-start gap-4">
             <div className={`grid size-11 shrink-0 place-items-center rounded-md font-black ${unitOpen ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{unit.number}</div>
@@ -233,7 +273,7 @@ function CoursePath({ completed, onOpen, expanded }: { completed: string[]; onOp
               <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="font-display text-xl font-semibold">{unit.title}</h3><p className="text-sm text-muted-foreground">{done} of {unit.lessons.length} lessons</p></div><span className="text-xs font-bold text-muted-foreground">{progress}%</span></div>
               <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} /></div>
               {(expanded || unitOpen) && <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                {unit.lessons.map((lesson) => { const status = lessonStatus(lesson.id, completed); return <button key={lesson.id} disabled={status === "locked"} onClick={() => onOpen(lesson.id)} className={`flex min-h-12 items-center gap-3 rounded-md border px-3 text-left text-sm font-bold transition ${status === "current" ? "border-primary bg-secondary text-secondary-foreground" : "border-border bg-background hover:border-primary disabled:opacity-55 disabled:hover:border-border"}`}>
+                {unit.lessons.map((lesson) => { const status = lessonStatus(lesson.id, completed, units.flatMap((u) => u.lessons)); return <button key={lesson.id} disabled={status === "locked"} onClick={() => onOpen(lesson.id)} className={`flex min-h-12 items-center gap-3 rounded-md border px-3 text-left text-sm font-bold transition ${status === "current" ? "border-primary bg-secondary text-secondary-foreground" : "border-border bg-background hover:border-primary disabled:opacity-55 disabled:hover:border-border"}`}>
                   <span className={`grid size-7 shrink-0 place-items-center rounded-full ${status === "done" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{status === "done" ? <Check className="size-3.5" /> : status === "locked" ? <LockKeyhole className="size-3.5" /> : <BookOpen className="size-3.5" />}</span><span className="flex-1">{lesson.title}</span>{status === "done" && <span className="text-xs font-bold text-muted-foreground">Replay</span>}
                 </button>; })}
               </div>}
@@ -244,8 +284,3 @@ function CoursePath({ completed, onOpen, expanded }: { completed: string[]; onOp
     </section>
   );
 }
-
-function ComingSoon({ tab, onBack }: { tab: Exclude<Tab, "Home" | "Learn">; onBack: () => void }) {
-  return <section className="mx-auto max-w-2xl py-24 text-center"><span className="mx-auto grid size-14 place-items-center rounded-md bg-secondary text-secondary-foreground"><Sparkles className="size-6" /></span><p className="mt-6 text-xs font-bold uppercase text-primary">First milestone</p><h1 className="mt-2 font-display text-4xl font-semibold">{tab} is taking shape.</h1><p className="mx-auto mt-4 max-w-lg text-muted-foreground">This area is reserved in the learning experience and will be connected when approved content and services are ready.</p><Button className="mt-7" onClick={onBack}>Return home</Button></section>;
-}
-
