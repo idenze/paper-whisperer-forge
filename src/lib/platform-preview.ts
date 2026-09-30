@@ -1,14 +1,22 @@
 // PREVIEW DATA ONLY — fictional, never saved, always shown with a "Preview" label.
 // Delete this file once the backend agent supplies the contracts in contracts.ts.
+import tobiPhoto from "@/assets/sample-learner-tobi.jpg";
+import nnekaPhoto from "@/assets/sample-learner-nneka.jpg";
+import ikePhoto from "@/assets/sample-learner-ike.jpg";
+import adaezePhoto from "@/assets/sample-teacher-adaeze.jpg";
+import emekaPhoto from "@/assets/sample-teacher-emeka.jpg";
 import type { AdminRow, Assignment, AppNotification, Conversation, Lesson, Message, ProgressSummary, Slot, StudentRecord, WalletSummary } from "./contracts";
 
 const day = (offset: number, h: number) => { const d = new Date(); d.setDate(d.getDate() + offset); d.setHours(h, 0, 0, 0); return d.toISOString(); };
 
+/** Fictional sample profile photos. "You" in the preview is Tobi A. as a student, Adaeze O. as a teacher. */
+export const previewIdentity = { student: { name: "Tobi A.", photoUrl: tobiPhoto }, teacher: { name: "Adaeze O.", photoUrl: adaezePhoto } };
+
 export const previewLessons: Lesson[] = [
-  { id: "l1", teacherName: "Adaeze O.", studentName: "Tobi A.", topic: "Greetings at the market", startsAt: day(0, 18), minutes: 60, status: "confirmed", payment: "verified", priceLabel: "₦8,000", canJoin: true },
-  { id: "l2", teacherName: "Adaeze O.", studentName: "Nneka B.", topic: "Family words", startsAt: day(0, 20), minutes: 30, status: "confirmed", payment: "pending", priceLabel: "₦4,500", canJoin: false },
-  { id: "l3", teacherName: "Mr. Emeka N.", studentName: "Tobi A.", topic: "Tone practice", startsAt: day(2, 17), minutes: 60, status: "requested", payment: "unpaid", priceLabel: "₦7,000", canJoin: false },
-  { id: "l4", teacherName: "Adaeze O.", studentName: "Tobi A.", topic: "Numbers", startsAt: day(-3, 18), minutes: 60, status: "completed", payment: "verified", priceLabel: "₦8,000", canJoin: false },
+  { id: "l1", teacherName: "Adaeze O.", teacherPhotoUrl: adaezePhoto, studentName: "Tobi A.", studentPhotoUrl: tobiPhoto, topic: "Greetings at the market", startsAt: day(0, 18), minutes: 60, status: "confirmed", payment: "verified", priceLabel: "₦8,000", canJoin: true },
+  { id: "l2", teacherName: "Adaeze O.", teacherPhotoUrl: adaezePhoto, studentName: "Nneka B.", studentPhotoUrl: nnekaPhoto, topic: "Family words", startsAt: day(0, 20), minutes: 30, status: "confirmed", payment: "pending", priceLabel: "₦4,500", canJoin: false },
+  { id: "l3", teacherName: "Mr. Emeka N.", teacherPhotoUrl: emekaPhoto, studentName: "Tobi A.", studentPhotoUrl: tobiPhoto, topic: "Tone practice", startsAt: day(2, 17), minutes: 60, status: "requested", payment: "unpaid", priceLabel: "₦7,000", canJoin: false },
+  { id: "l4", teacherName: "Adaeze O.", teacherPhotoUrl: adaezePhoto, studentName: "Tobi A.", studentPhotoUrl: tobiPhoto, topic: "Numbers", startsAt: day(-3, 18), minutes: 60, status: "completed", payment: "verified", priceLabel: "₦8,000", canJoin: false },
 ];
 
 export function previewSlots(date: Date): Slot[] {
@@ -21,8 +29,8 @@ export function previewSlots(date: Date): Slot[] {
 }
 
 export const previewConversations: Conversation[] = [
-  { id: "c1", name: "Adaeze O.", lastMessage: "See you at 6 — bring the market words.", unread: 2, updatedAt: "18:02" },
-  { id: "c2", name: "Mr. Emeka N.", lastMessage: "I've accepted your request.", unread: 0, updatedAt: "Yesterday" },
+  { id: "c1", name: "Adaeze O.", photoUrl: adaezePhoto, lastMessage: "See you at 6 — bring the market words.", unread: 2, updatedAt: "18:02" },
+  { id: "c2", name: "Mr. Emeka N.", photoUrl: emekaPhoto, lastMessage: "I've accepted your request.", unread: 0, updatedAt: "Yesterday" },
 ];
 export const previewMessages: Record<string, Message[]> = {
   c1: [
@@ -47,9 +55,9 @@ export const previewProgress: ProgressSummary = {
 };
 
 export const previewStudents: StudentRecord[] = [
-  { id: "s1", name: "Tobi A.", level: "Beginner 2", goal: "Talk with grandparents", lessonsCompleted: 12, lastLesson: "3 days ago", nextLesson: "Today 18:00", progress: 55, openAssignments: 1, note: "Strong listening; tones need work." },
-  { id: "s2", name: "Nneka B.", level: "Beginner 1", goal: "Travel to Enugu", lessonsCompleted: 3, lastLesson: "Last week", nextLesson: "Today 20:00", progress: 20, openAssignments: 1, note: "Payment pending for today." },
-  { id: "s3", name: "Ike C.", level: "Intermediate", goal: "Read Igbo news", lessonsCompleted: 30, lastLesson: "2 weeks ago", nextLesson: null, progress: 70, openAssignments: 1, note: "Homework overdue — check in." },
+  { id: "s1", name: "Tobi A.", photoUrl: tobiPhoto, level: "Beginner 2", goal: "Talk with grandparents", lessonsCompleted: 12, lastLesson: "3 days ago", nextLesson: "Today 18:00", progress: 55, openAssignments: 1, note: "Strong listening; tones need work." },
+  { id: "s2", name: "Nneka B.", photoUrl: nnekaPhoto, level: "Beginner 1", goal: "Travel to Enugu", lessonsCompleted: 3, lastLesson: "Last week", nextLesson: "Today 20:00", progress: 20, openAssignments: 1, note: "Payment pending for today." },
+  { id: "s3", name: "Ike C.", photoUrl: ikePhoto, level: "Intermediate", goal: "Read Igbo news", lessonsCompleted: 30, lastLesson: "2 weeks ago", nextLesson: null, progress: 70, openAssignments: 1, note: "Homework overdue — check in." },
 ];
 
 export const previewWallet: WalletSummary = {

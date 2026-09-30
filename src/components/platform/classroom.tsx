@@ -3,6 +3,8 @@ import { BookOpen, Bot, Clock, FileText, Mic, MicOff, MessageSquare, MonitorUp, 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/product-ui";
 import { LocalPreviewVideoService, type VideoService } from "@/lib/video-service";
+import { previewIdentity } from "@/lib/platform-preview";
+import { useAuth } from "@/lib/use-auth";
 import type { Lesson } from "@/lib/contracts";
 
 type Panel = "chat" | "materials" | "whiteboard" | "notes" | "assistant" | "info";
@@ -26,6 +28,7 @@ export function Classroom({ lesson, role, onLeave }: { lesson: Lesson; role: "st
   const [chat, setChat] = useState<string[]>(["Teacher: Nnọọ! Welcome."]);
   const [draft, setDraft] = useState("");
   const [notes, setNotes] = useState("");
+  const { user } = useAuth();
 
   useEffect(() => {
     const s = service.current;
@@ -40,6 +43,10 @@ export function Classroom({ lesson, role, onLeave }: { lesson: Lesson; role: "st
   const toggleCam = () => { cam ? service.current.disableCamera() : service.current.enableCamera(); setCam(!cam); };
   const time = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
   const other = role === "student" ? lesson.teacherName : lesson.studentName;
+  const otherPhoto = role === "student" ? lesson.teacherPhotoUrl : lesson.studentPhotoUrl;
+  // "You": the real signed-in learner's profile image when available, otherwise the preview identity.
+  const selfPhoto = role === "student" ? user?.user_metadata?.["avatar_url"] ?? previewIdentity.student.photoUrl : previewIdentity.teacher.photoUrl;
+  const selfName = role === "student" ? (user?.user_metadata?.["full_name"] as string | undefined) ?? previewIdentity.student.name : previewIdentity.teacher.name;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-foreground text-background">
@@ -59,15 +66,23 @@ export function Classroom({ lesson, role, onLeave }: { lesson: Lesson; role: "st
         <section className="relative flex min-h-0 flex-1 items-center justify-center p-3" aria-label="Video">
           <div className="grid size-full place-items-center rounded-md bg-background/5">
             <div className="text-center">
-              <div className="mx-auto grid size-24 place-items-center rounded-full bg-primary text-3xl font-display text-primary-foreground">{other[0]}</div>
+              {otherPhoto
+                ? <img src={otherPhoto} alt={`Waiting for ${other}'s video`} width={256} height={256} loading="lazy" className="mx-auto size-24 rounded-full object-cover" />
+                : <div className="mx-auto grid size-24 place-items-center rounded-full bg-primary text-3xl font-display text-primary-foreground">{other[0]}</div>}
               <p className="mt-3 text-sm">{other}</p>
               <p className="text-xs opacity-60">Waiting for the video provider to connect</p>
             </div>
           </div>
           <div className="absolute bottom-5 right-5 aspect-video w-36 overflow-hidden rounded-md border border-background/20 bg-background/10 sm:w-52">
             <video ref={videoEl} autoPlay muted playsInline className={cam ? "size-full object-cover" : "hidden"} />
-            {!cam && <p className="grid size-full place-items-center text-xs">Camera off</p>}
-            <span className="absolute left-2 top-1 text-[10px]">You</span>
+            {!cam && (
+              <div className="grid size-full place-items-center">
+                {selfPhoto
+                  ? <img src={selfPhoto} alt={`${selfName} — camera off`} width={256} height={256} loading="lazy" className="size-full object-cover opacity-70" />
+                  : <p className="text-xs">Camera off</p>}
+              </div>
+            )}
+            <span className="absolute left-2 top-1 text-[10px]">You{cam ? "" : " · camera off"}</span>
           </div>
           {sharing && <p className="absolute left-5 top-5 rounded bg-primary px-2 py-1 text-xs text-primary-foreground">Sharing screen</p>}
         </section>

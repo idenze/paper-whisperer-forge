@@ -91,11 +91,16 @@ const fmt = (iso: string) => new Date(iso).toLocaleString(undefined, { weekday: 
 const statusTone = (s: string) => (["confirmed", "verified", "reviewed", "Approved", "Verified", "Paid", "Published", "Active"].includes(s) ? "positive" : ["requested", "pending", "overdue", "Pending", "Open dispute", "unpaid"].includes(s) ? "warning" : "neutral") as "positive" | "warning" | "neutral";
 
 function LessonRow({ l, role, onJoin }: { l: Lesson; role: Role; onJoin: (l: Lesson) => void }) {
+  const otherName = role === "teacher" ? l.studentName : l.teacherName;
+  const otherPhoto = role === "teacher" ? l.studentPhotoUrl : l.teacherPhotoUrl;
   return (
     <li className="flex flex-wrap items-center gap-3 border-b border-border py-4 last:border-0">
-      <div className="min-w-0 flex-1">
+      {otherPhoto
+        ? <img src={otherPhoto} alt={`Sample photo of ${otherName}`} width={80} height={80} loading="lazy" className="size-10 rounded-full object-cover" />
+        : <span className="grid size-10 place-items-center rounded-full bg-muted font-semibold">{otherName[0]}</span>}
+      <div className="min-w-[10rem] flex-1">
         <p className="font-semibold">{l.topic}</p>
-        <p className="text-sm text-muted-foreground">{fmt(l.startsAt)} · {l.minutes} min · {role === "teacher" ? l.studentName : l.teacherName}</p>
+        <p className="text-sm text-muted-foreground">{fmt(l.startsAt)} · {l.minutes} min · {otherName}</p>
       </div>
       <StatusBadge tone={statusTone(l.status)}>{l.status}</StatusBadge>
       <StatusBadge tone={statusTone(l.payment)}>{l.payment === "verified" ? "Paid" : l.payment}</StatusBadge>
@@ -120,7 +125,10 @@ function StudentDashboard({ onJoin, go }: { onJoin: (l: Lesson) => void; go: (s:
       <section className="bg-primary p-6 text-primary-foreground lg:col-span-2">
         <Eyebrow className="text-primary-foreground/80">Ihe na-esote · Next lesson</Eyebrow>
         <h1 className="mt-2 font-display text-3xl">{next.topic}</h1>
-        <p className="mt-1 opacity-80">with {next.teacherName} · {fmt(next.startsAt)}</p>
+        <p className="mt-1 flex items-center gap-2 opacity-80">
+          {next.teacherPhotoUrl && <img src={next.teacherPhotoUrl} alt={`Sample photo of ${next.teacherName}`} width={80} height={80} loading="lazy" className="size-8 rounded-full object-cover" />}
+          with {next.teacherName} · {fmt(next.startsAt)}
+        </p>
         <Button variant="secondary" className="mt-5" onClick={() => onJoin(next)}>Join lesson</Button>
       </section>
       <Card title="Your progress" eyebrow="Level">
@@ -146,7 +154,14 @@ function TeacherDashboard({ onJoin, go }: { onJoin: (l: Lesson) => void; go: (s:
       <div className="lg:col-span-2"><Card title="Today's lessons" eyebrow="Agenda"><ul>{today.map((l) => <LessonRow key={l.id} l={l} role="teacher" onJoin={onJoin} />)}</ul></Card></div>
       <Card title="This month" eyebrow="Earnings"><p className="font-display text-3xl">{previewWallet.currency}{previewWallet.thisMonth.toLocaleString()}</p><p className="text-sm text-muted-foreground">{previewWallet.lessons} lessons · figures come from the payment system</p><button className="mt-3 text-sm text-primary" onClick={() => go("earnings")}>Open earnings →</button></Card>
       <Card title="Needs attention" eyebrow="Students">
-        <ul className="space-y-2 text-sm">{previewStudents.map((s) => <li key={s.id}><b>{s.name}</b> — {s.note}</li>)}</ul>
+        <ul className="space-y-2 text-sm">{previewStudents.map((s) => (
+          <li key={s.id} className="flex items-center gap-2">
+            {s.photoUrl
+              ? <img src={s.photoUrl} alt={`Sample photo of ${s.name}`} width={80} height={80} loading="lazy" className="size-8 rounded-full object-cover" />
+              : <span className="grid size-8 place-items-center rounded-full bg-muted text-xs font-semibold">{s.name[0]}</span>}
+            <span className="min-w-0 flex-1"><b>{s.name}</b> — {s.note}</span>
+          </li>
+        ))}</ul>
       </Card>
       <Card title="Prepare" eyebrow="Before 18:00">
         <ul className="space-y-2 text-sm"><li>☐ Share “Market greetings” material</li><li>☐ Review Tobi's greeting recordings</li><li>☐ Add notes after Numbers lesson</li></ul>
@@ -249,7 +264,9 @@ function StudentsList() {
     <Card title="Your students" eyebrow="Ụmụ akwụkwọ">
       <ul>{previewStudents.map((st) => (
         <li key={st.id}><button onClick={() => setOpen(st.id)} className="flex w-full flex-wrap items-center gap-3 border-b border-border py-3 text-left last:border-0">
-          <span className="grid size-10 place-items-center rounded-full bg-muted font-semibold">{st.name[0]}</span>
+          {st.photoUrl
+            ? <img src={st.photoUrl} alt={`Sample photo of ${st.name}`} width={80} height={80} loading="lazy" className="size-10 rounded-full object-cover" />
+            : <span className="grid size-10 place-items-center rounded-full bg-muted font-semibold">{st.name[0]}</span>}
           <span className="min-w-0 flex-1"><b>{st.name}</b><span className="block text-sm text-muted-foreground">{st.level} · next: {st.nextLesson ?? "not booked"}</span></span>
           <span className="w-24"><span className="block h-2 rounded bg-muted"><span className="block h-2 rounded bg-primary" style={{ width: `${st.progress}%` }} /></span></span>
         </button></li>
@@ -273,14 +290,18 @@ function Messages() {
       <ul className={`border-r border-border ${active ? "hidden md:block" : ""}`}>
         {previewConversations.map((c) => (
           <li key={c.id}><button onClick={() => setActive(c.id)} className={`w-full border-b border-border p-4 text-left ${active === c.id ? "bg-muted" : ""}`}>
-            <span className="flex justify-between"><b>{c.name}</b><span className="text-xs text-muted-foreground">{c.updatedAt}</span></span>
+            <span className="flex items-center justify-between gap-2"><span className="flex min-w-0 items-center gap-2">
+              {c.photoUrl
+                ? <img src={c.photoUrl} alt={`Sample photo of ${c.name}`} width={64} height={64} loading="lazy" className="size-8 rounded-full object-cover" />
+                : <span className="grid size-8 place-items-center rounded-full bg-muted text-xs font-semibold">{c.name[0]}</span>}
+              <b className="truncate">{c.name}</b></span><span className="text-xs text-muted-foreground">{c.updatedAt}</span></span>
             <span className="flex gap-2 text-sm text-muted-foreground"><span className="truncate">{c.lastMessage}</span>{c.unread > 0 && <span className="rounded-full bg-primary px-2 text-xs text-primary-foreground">{c.unread}</span>}</span>
           </button></li>
         ))}
       </ul>
       {convo ? (
         <div className="flex flex-col">
-          <div className="flex items-center gap-2 border-b border-border p-4"><button className="md:hidden" aria-label="Back" onClick={() => setActive(null)}><ArrowLeft className="size-4" /></button><b>{convo.name}</b></div>
+          <div className="flex items-center gap-2 border-b border-border p-4"><button className="md:hidden" aria-label="Back" onClick={() => setActive(null)}><ArrowLeft className="size-4" /></button>{convo.photoUrl && <img src={convo.photoUrl} alt="" width={64} height={64} className="size-8 rounded-full object-cover" />}<b>{convo.name}</b></div>
           <div className="flex-1 space-y-2 overflow-auto p-4">{(threads[convo.id] ?? []).map((m) => (
             <div key={m.id} className={`max-w-[75%] rounded-lg px-3 py-2 text-sm ${m.fromMe ? "ml-auto bg-primary text-primary-foreground" : "bg-muted"}`}>{m.body}<span className="mt-1 block text-[10px] opacity-70">{m.at}{m.fromMe && ` · ${m.state === "sending" ? "Not sent — preview" : "Sent"}`}</span></div>
           ))}</div>
