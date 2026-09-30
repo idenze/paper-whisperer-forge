@@ -128,7 +128,7 @@ function Story({ lesson, turn, setTurn, onDone }: { lesson: Lesson; turn: number
           <div className="grid gap-2 sm:grid-cols-3">
             {ask.options.map((o, i) => {
               const state = picked === null ? "" : i === ask.correct && picked === i ? "border-primary bg-secondary" : picked === i ? "border-accent bg-accent/10" : "";
-              return <button key={i} onClick={() => choose(i)} className={`rounded-md border-2 border-b-4 border-border bg-card p-3 text-left transition hover:border-primary ${state}`}><span className="block font-bold" lang="ig">{o.text}</span><span className="text-xs text-muted-foreground">{o.meaning}</span></button>;
+              return <button key={i} onClick={() => choose(i)} className={`rounded-md border-2 border-b-4 border-border bg-card p-3 text-left transition hover:border-primary ${state}`}><span className="block font-bold" lang="ig">{o.text}</span>{picked !== null && <span className="text-xs text-muted-foreground">{o.meaning}</span>}</button>;
             })}
           </div>
           {picked !== null && picked !== ask.correct && (
