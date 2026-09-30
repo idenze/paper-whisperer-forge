@@ -14,7 +14,6 @@ import {
   Trophy,
   UserRound,
   Volume2,
-  X,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/button";
