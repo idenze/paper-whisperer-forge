@@ -5,10 +5,12 @@ import { Button } from "@/components/button";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { useAuth } from "@/lib/use-auth";
+import { sampleRatings, sampleReviews, sampleTeachers } from "@/lib/teacher-samples";
+import { SampleBanner, SampleDashboards, type SampleRole } from "@/components/teachers-samples-view";
 
 type Teacher = Tables<"teacher_profiles">;
 type Rating = { teacher_id: string | null; avg_rating: number | null; review_count: number | null };
-type Screen = { name: "browse" } | { name: "profile"; id: string } | { name: "teach" } | { name: "mine" };
+type Screen = { name: "browse" } | { name: "profile"; id: string } | { name: "teach" } | { name: "mine" } | { name: "samples"; role: SampleRole };
 
 const money = (kobo: number, cur = "NGN") => new Intl.NumberFormat("en-NG", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(kobo / 100);
 const input = "w-full rounded-md border border-input bg-card px-3 py-2.5 text-sm outline-none focus:border-primary";
@@ -34,14 +36,18 @@ export function TeachersView() {
   const approved = teachers.filter((t) => t.status === "approved");
   const pending = teachers.filter((t) => t.status === "pending");
   const mine = teachers.find((t) => t.user_id === auth.user?.id);
-  const list = useMemo(() => approved.filter((t) =>
+  const showingSamples = approved.length === 0;
+  const pool = showingSamples ? sampleTeachers : approved;
+  const allRatings = showingSamples ? (sampleRatings as unknown as Record<string, Rating>) : ratings;
+  const list = useMemo(() => pool.filter((t) =>
     (!schoolsOnly || t.open_to_schools) &&
-    [t.display_name, t.headline, t.specialties.join(" "), t.dialects.join(" ")].join(" ").toLowerCase().includes(q.toLowerCase())), [approved, q, schoolsOnly]);
+    [t.display_name, t.headline, t.specialties.join(" "), t.dialects.join(" ")].join(" ").toLowerCase().includes(q.toLowerCase())), [pool, q, schoolsOnly]);
 
   if (screen.name === "profile") {
-    const t = teachers.find((x) => x.id === screen.id);
-    if (t) return <TeacherProfile t={t} rating={ratings[t.id]} onBack={() => setScreen({ name: "browse" })} />;
+    const t = [...teachers, ...sampleTeachers].find((x) => x.id === screen.id);
+    if (t) return <TeacherProfile t={t} rating={allRatings[t.id]} onBack={() => setScreen({ name: "browse" })} />;
   }
+  if (screen.name === "samples") return <SampleDashboards role={screen.role} setRole={(role) => setScreen({ name: "samples", role })} onBack={() => setScreen({ name: "browse" })} />;
   if (screen.name === "teach") return <TeachForm existing={mine} onDone={() => { void load(); setScreen({ name: "mine" }); }} onBack={() => setScreen({ name: "browse" })} />;
   if (screen.name === "mine") return <MyLessons teacher={mine} onBack={() => setScreen({ name: "browse" })} onEdit={() => setScreen({ name: "teach" })} />;
 
@@ -55,6 +61,13 @@ export function TeachersView() {
           <Button variant="secondary" onClick={() => setScreen({ name: "teach" })} disabled={!auth.user}><GraduationCap className="size-4" /> {mine ? "Edit my teacher profile" : "Teach on Ozituma"}</Button>
           {auth.user ? <Button variant="secondary" onClick={() => setScreen({ name: "mine" })}><CalendarPlus className="size-4" /> My lessons</Button>
             : <Button asChild variant="secondary"><Link to="/auth">Sign in to book or teach</Link></Button>}
+        </div>
+        <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-brand-foreground/20 pt-4">
+          <span className="text-xs font-extrabold uppercase opacity-80">Preview samples:</span>
+          <Button variant="secondary" onClick={() => setScreen({ name: "samples", role: "teacher" })}>Teacher dashboard</Button>
+          <Button variant="secondary" onClick={() => setScreen({ name: "samples", role: "learner" })}>Learner page</Button>
+          <Button variant="secondary" onClick={() => setScreen({ name: "samples", role: "school" })}>School page</Button>
+          <Button variant="secondary" onClick={() => setScreen({ name: "samples", role: "admin" })}>Admin approvals</Button>
         </div>
       </section>
 
@@ -77,6 +90,7 @@ export function TeachersView() {
         <label className="flex items-center gap-2 text-sm font-bold"><input type="checkbox" checked={schoolsOnly} onChange={(e) => setSchoolsOnly(e.target.checked)} className="size-4 accent-primary" /><Building2 className="size-4" /> Open to schools</label>
       </div>
 
+      {showingSamples && <div className="mt-6"><SampleBanner /></div>}
       {list.length === 0 ? (
         <div className="mt-6 rounded-lg border border-dashed border-border bg-card p-10 text-center">
           <GraduationCap className="mx-auto size-8 text-primary" />
@@ -85,7 +99,7 @@ export function TeachersView() {
         </div>
       ) : (
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {list.map((t) => <TeacherCard key={t.id} t={t} rating={ratings[t.id]} onOpen={() => setScreen({ name: "profile", id: t.id })} />)}
+          {list.map((t) => <TeacherCard key={t.id} t={t} rating={allRatings[t.id]} onOpen={() => setScreen({ name: "profile", id: t.id })} />)}
         </div>
       )}
     </div>
@@ -118,16 +132,17 @@ function TeacherProfile({ t, rating, onBack }: { t: Teacher; rating?: Rating | u
   const [reviews, setReviews] = useState<Tables<"teacher_reviews">[]>([]);
   const [mode, setMode] = useState<"book" | "hire">("book");
   const [msg, setMsg] = useState("");
-  useEffect(() => { supabase.from("teacher_reviews").select("*").eq("teacher_id", t.id).order("created_at", { ascending: false }).then(({ data }) => setReviews(data ?? [])); }, [t.id]);
+  const isSample = t.id.startsWith("sample-");
+  useEffect(() => { if (isSample) return; supabase.from("teacher_reviews").select("*").eq("teacher_id", t.id).order("created_at", { ascending: false }).then(({ data }) => setReviews(data ?? [])); }, [t.id]);
 
   const book = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); const f = new FormData(e.currentTarget);
+    e.preventDefault(); if (isSample) { setMsg("Sample only — in the real app this sends a lesson request to the teacher."); return; } const f = new FormData(e.currentTarget);
     const minutes = Number(f.get("minutes"));
     const { error } = await supabase.from("lesson_bookings").insert({ teacher_id: t.id, learner_id: auth.user!.id, starts_at: new Date(String(f.get("when"))).toISOString(), minutes, note: String(f.get("note") ?? "") });
     setMsg(error ? error.message : "Request sent. The teacher will confirm, then you'll pay securely to lock the slot.");
   };
   const hire = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); const f = new FormData(e.currentTarget);
+    e.preventDefault(); if (isSample) { setMsg("Sample only — in the real app this sends a hiring request."); return; } const f = new FormData(e.currentTarget);
     const { error } = await supabase.from("school_hire_requests").insert({ teacher_id: t.id, requester_id: auth.user!.id, school_name: String(f.get("school")), contact_email: String(f.get("email")), role_details: String(f.get("details") ?? "") });
     setMsg(error ? error.message : "Your request has been sent to the teacher.");
   };
@@ -139,6 +154,7 @@ function TeacherProfile({ t, rating, onBack }: { t: Teacher; rating?: Rating | u
         <div className="space-y-5">
           <section className="rounded-lg border border-border bg-card p-6">
             <div className="flex flex-wrap items-center gap-4"><Avatar t={t} size="size-20" /><div><h1 className="font-display text-3xl font-semibold">{t.display_name}</h1><p className="text-muted-foreground">{t.headline}</p><div className="mt-1"><Stars rating={rating} /></div></div></div>
+            {isSample && <div className="mt-4"><SampleBanner /></div>}
             {t.status !== "approved" && <p className="mt-4 rounded-md bg-muted px-3 py-2 text-xs font-black uppercase">Awaiting approval · not visible to learners</p>}
             <p className="mt-5 whitespace-pre-line leading-7">{t.bio}</p>
             {t.video_url && <a href={t.video_url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block text-sm font-bold text-primary underline">Watch intro video</a>}
@@ -151,7 +167,7 @@ function TeacherProfile({ t, rating, onBack }: { t: Teacher; rating?: Rating | u
           </section>
           <section className="rounded-lg border border-border bg-card p-6">
             <h2 className="font-display text-xl font-semibold">Reviews</h2>
-            {reviews.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No reviews yet. Only learners who completed a lesson can review.</p> :
+            {isSample ? <div className="mt-3 divide-y divide-border">{sampleReviews.map((r) => <div key={r.id} className="py-3"><p className="flex gap-0.5 text-highlight">{Array.from({ length: r.rating }).map((_, i) => <Star key={i} className="size-4" fill="currentColor" />)}</p><p className="mt-1 text-sm">{r.comment}</p><p className="text-xs text-muted-foreground">{r.who} · {r.date}</p></div>)}</div> : reviews.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No reviews yet. Only learners who completed a lesson can review.</p> :
               <div className="mt-3 divide-y divide-border">{reviews.map((r) => <div key={r.id} className="py-3"><p className="flex gap-0.5 text-highlight">{Array.from({ length: r.rating }).map((_, i) => <Star key={i} className="size-4" fill="currentColor" />)}</p><p className="mt-1 text-sm">{r.comment}</p><p className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</p></div>)}</div>}
           </section>
         </div>
@@ -162,7 +178,7 @@ function TeacherProfile({ t, rating, onBack }: { t: Teacher; rating?: Rating | u
             <button onClick={() => { setMode("book"); setMsg(""); }} className={`rounded px-3 py-2 text-sm font-bold ${mode === "book" ? "bg-card shadow-sm" : ""}`}>Book lesson</button>
             <button onClick={() => { setMode("hire"); setMsg(""); }} disabled={!t.open_to_schools} className={`rounded px-3 py-2 text-sm font-bold disabled:opacity-40 ${mode === "hire" ? "bg-card shadow-sm" : ""}`}>Hire for school</button>
           </div>
-          {!auth.user ? <Button asChild className="mt-4 w-full"><Link to="/auth">Sign in to continue</Link></Button> : mode === "book" ? (
+          {!auth.user && !isSample ? <Button asChild className="mt-4 w-full"><Link to="/auth">Sign in to continue</Link></Button> : mode === "book" ? (
             <form onSubmit={book} className="mt-4 space-y-3">
               <label className="block text-xs font-bold">Date and time<input name="when" type="datetime-local" required className={`${input} mt-1`} /></label>
               <label className="block text-xs font-bold">Length<select name="minutes" className={`${input} mt-1`}><option value="30">30 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option></select></label>
@@ -173,7 +189,7 @@ function TeacherProfile({ t, rating, onBack }: { t: Teacher; rating?: Rating | u
           ) : (
             <form onSubmit={hire} className="mt-4 space-y-3">
               <label className="block text-xs font-bold">School or organisation<input name="school" required className={`${input} mt-1`} /></label>
-              <label className="block text-xs font-bold">Contact email<input name="email" type="email" required defaultValue={auth.user.email ?? ""} className={`${input} mt-1`} /></label>
+              <label className="block text-xs font-bold">Contact email<input name="email" type="email" required defaultValue={auth.user?.email ?? ""} className={`${input} mt-1`} /></label>
               <label className="block text-xs font-bold">Role, hours and location<textarea name="details" rows={4} className={`${input} mt-1`} /></label>
               <Button type="submit" className="w-full">Send hiring request</Button>
             </form>
