@@ -46,7 +46,7 @@ export function PracticeGame({ onClose, onComplete }: PracticeGameProps) {
   const [checked, setChecked] = useState(false);
   const [audioPlayed, setAudioPlayed] = useState(false);
   const [finished, setFinished] = useState(false);
-  const current = rounds[round];
+  const current = rounds[round] ?? rounds[0];
   const isCorrect = selected === current.correct;
 
   const advance = () => {
