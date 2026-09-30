@@ -1,16 +1,38 @@
-import { AudioWaveform, Ear, MessagesSquare, Mountain, type LucideIcon } from "lucide-react";
+import { AudioWaveform, Keyboard, Ear, MessagesSquare, Mountain, type LucideIcon } from "lucide-react";
 
 export type PracticeOption = {
   icon: string;
   label: string;
 };
 
-export type PracticeRound = {
+export type ChoiceRound = {
+  kind?: "choice";
   prompt: string;
   hint: string;
   options: readonly PracticeOption[];
   correct: number;
 };
+
+/** Typing round: the learner sees a meaning and types the Igbo word. */
+export type TypeRound = {
+  kind: "type";
+  prompt: string;
+  hint: string;
+  meaning: string;
+  answer: string;
+  hasAudio?: boolean;
+};
+
+export type PracticeRound = ChoiceRound | TypeRound;
+
+const typeRound = (meaning: string, answer: string): TypeRound => ({
+  kind: "type",
+  prompt: "Type this in Igbo.",
+  hint: "Tone marks count. Use the letter keys below for ị, ọ, ụ, ṅ and tones.",
+  meaning,
+  answer,
+  hasAudio: true,
+});
 
 export type PracticeFocus = {
   id: string;
@@ -59,6 +81,7 @@ export const lessonRounds: readonly PracticeRound[] = [
     ],
     correct: 3,
   },
+  typeRound("PLACEHOLDER meaning — a greeting", "PLACEHOLDER"),
 ];
 
 /**
@@ -66,6 +89,18 @@ export const lessonRounds: readonly PracticeRound[] = [
  * the lesson path — these are repeatable drills, not curriculum progress.
  */
 export const practiceFocuses: readonly PracticeFocus[] = [
+  {
+    id: "type",
+    name: "Type it",
+    detail: "See a meaning, type the Igbo word with its tone marks.",
+    minutes: 3,
+    icon: Keyboard,
+    rounds: [
+      typeRound("PLACEHOLDER meaning A", "PLACEHOLDER"),
+      typeRound("PLACEHOLDER meaning B", "PLACEHOLDER"),
+      typeRound("PLACEHOLDER meaning C", "PLACEHOLDER"),
+    ],
+  },
   {
     id: "ear",
     name: "Ear training",

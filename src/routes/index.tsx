@@ -109,7 +109,9 @@ function Index() {
         </section>
         )}
 
-        {activeTab === "Tutor" ? (
+        {lessonOpen ? (
+          <PracticeGame rounds={lessonRounds} mode="lesson" onClose={() => setLessonOpen(false)} onComplete={() => markDone("continue")} />
+        ) : activeTab === "Tutor" ? (
           <TutorView />
         ) : activeTab === "Practise" ? (
           <PracticeView />
@@ -203,7 +205,6 @@ function Index() {
         )}
       </nav>
 
-      {lessonOpen && <PracticeGame rounds={lessonRounds} mode="lesson" onClose={() => setLessonOpen(false)} onComplete={() => markDone("continue")} />}
     </div>
   );
 }

@@ -7,4 +7,5 @@
 - [x] Add the Ndebe learning studio from the supplied course plan.
 - [x] Replace the basic meaning quiz with an original tactile, three-round listening game.
 - [x] Ndebe studio: type, catalogue, teaching forms, numerals, arithmetic, typing help, fonts
+- [x] Typing practice (meaning → type Igbo, tone-mark check) and in-page practice with clear exit
 - [ ] Connect verified Ozituma curriculum, dictionary, audio, Ndebe font, and input mappings (owner-supplied content required).
