@@ -245,11 +245,9 @@ function Index() {
 
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-7 border-t border-border bg-card px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-lg lg:hidden" aria-label="Mobile navigation">
         {navItems.map(({ label, icon: Icon, ...item }) =>
-          "href" in item ? (
-            <a key={label} href={item.href} target="_blank" rel="noopener noreferrer" className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-bold text-muted-foreground"><Icon className="size-5" />{label}</a>
-          ) : (
+          (
             <button key={label} onClick={() => setActiveTab(label as Tab)} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-bold ${activeTab === label ? "text-primary" : "text-muted-foreground"}`}><Icon className="size-5" />{label}</button>
-          ),
+          )
         )}
       </nav>
 
