@@ -24,3 +24,7 @@
 ## For the next agent
 - [ ] Installable desktop/mobile keyboards generated from keyboard-data.ts
 - [ ] Real Ńdẹ́bẹ́ font + glyph mapping; full course content; recordings; first admin role assignment
+- [x] Keyboard: 8 themes (Chalk, Midnight, Akwete, Uli, Forest, Ocean, Sunset, Neon), long-press vowel accents, key pop-ups, number row, height, haptics, suggestion strip
+- [x] Teachers marketplace: apply → admin approve → public profiles, book lessons, school hiring requests, reviews after completed lessons
+- [ ] Paystack checkout + webhook to set lesson_bookings.paid (needs Paystack secret key) — next agent
+- [ ] Video lesson room (e.g. Daily/Jitsi link per booking), teacher payouts via Paystack subaccounts/transfers — next agent
