@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, Check, MessagesSquare, Puzzle, RotateCcw, Sparkles, Volume2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/button";
-import { lessonMeta, storyTurns, wordCards } from "@/lib/lesson-data";
+import type { Lesson } from "@/lib/lesson-data";
 import { useStickyState } from "@/lib/use-sticky-state";
 
 type Stage = "cards" | "story" | "match" | "done";
@@ -11,11 +11,12 @@ const stages: { id: Stage; label: string; icon: typeof Sparkles }[] = [
   { id: "match", label: "Match", icon: Puzzle },
 ];
 
-export function LessonFlow({ onClose, onComplete }: { onClose: () => void; onComplete: () => void }) {
-  const [stage, setStage] = useStickyState<Stage>("lesson:stage", "cards");
-  const [card, setCard] = useStickyState("lesson:card", 0);
-  const [turn, setTurn] = useStickyState("lesson:turn", 0);
-  const [matched, setMatched] = useStickyState<string[]>("lesson:matched", []);
+export function LessonFlow({ lesson, onClose, onComplete, onNext }: { lesson: Lesson; onClose: () => void; onComplete: () => void; onNext?: () => void }) {
+  const k = `lesson:${lesson.id}`;
+  const [stage, setStage] = useStickyState<Stage>(`${k}:stage`, "cards");
+  const [card, setCard] = useStickyState(`${k}:card`, 0);
+  const [turn, setTurn] = useStickyState(`${k}:turn`, 0);
+  const [matched, setMatched] = useStickyState<string[]>(`${k}:matched`, []);
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); }, [stage]);
   useEffect(() => {
@@ -43,20 +44,22 @@ export function LessonFlow({ onClose, onComplete }: { onClose: () => void; onCom
         </ol>
       </div>
 
-      <p className="mb-1 text-xs font-extrabold uppercase text-primary">{lessonMeta.unit} · Placeholder content</p>
-      <h1 id="lesson-title" className="mb-5 font-display text-3xl font-semibold">{lessonMeta.title}</h1>
+      <p className="mb-1 text-xs font-extrabold uppercase text-primary">{lesson.unit} · Placeholder content</p>
+      <h1 id="lesson-title" className="mb-5 font-display text-3xl font-semibold">{lesson.title}</h1>
+      {stage !== "done" && <p className="-mt-3 mb-5 text-sm text-muted-foreground">{lesson.objective}</p>}
 
-      {stage === "cards" && <Cards index={card} setIndex={setCard} onDone={() => setStage("story")} />}
-      {stage === "story" && <Story turn={turn} setTurn={setTurn} onDone={() => setStage("match")} />}
-      {stage === "match" && <Match matched={matched} setMatched={setMatched} onDone={() => { setStage("done"); onComplete(); }} />}
+      {stage === "cards" && <Cards lesson={lesson} index={card} setIndex={setCard} onDone={() => setStage("story")} />}
+      {stage === "story" && <Story lesson={lesson} turn={turn} setTurn={setTurn} onDone={() => setStage("match")} />}
+      {stage === "match" && <Match lesson={lesson} matched={matched} setMatched={setMatched} onDone={() => { setStage("done"); onComplete(); }} />}
       {stage === "done" && (
         <div className="rounded-lg border border-border bg-card px-6 py-12 text-center shadow-sm">
           <span className="mx-auto grid size-20 place-items-center rounded-full bg-secondary text-primary"><Check className="size-10" strokeWidth={3} /></span>
           <h2 className="mt-5 font-display text-3xl font-semibold">Lesson complete</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">You learned {wordCards.length} phrases, used them in a chat, and matched them all.</p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">You learned {lesson.cards.length} phrases, used them in a chat, and matched them all.</p>
+          <div className="mx-auto mt-6 max-w-md rounded-md border border-highlight bg-highlight/15 p-4 text-left"><p className="text-xs font-extrabold uppercase text-highlight-foreground">Culture note</p><p className="mt-1 text-sm leading-6">{lesson.cultureNote}</p></div>
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <Button variant="secondary" onClick={restart}><RotateCcw className="size-4" /> Do it again</Button>
-            <Button onClick={() => { restart(); onClose(); }}>Back to journey</Button>
+            {onNext ? <Button onClick={() => { restart(); onNext(); }}>Next lesson <ArrowRight className="size-4" /></Button> : <Button onClick={() => { restart(); onClose(); }}>Back to journey</Button>}
           </div>
         </div>
       )}
@@ -64,14 +67,14 @@ export function LessonFlow({ onClose, onComplete }: { onClose: () => void; onCom
   );
 }
 
-function Cards({ index, setIndex, onDone }: { index: number; setIndex: (n: number) => void; onDone: () => void }) {
+function Cards({ lesson, index, setIndex, onDone }: { lesson: Lesson; index: number; setIndex: (n: number) => void; onDone: () => void }) {
   const [flipped, setFlipped] = useState(false);
-  const w = wordCards[Math.min(index, wordCards.length - 1)];
+  const w = lesson.cards[Math.min(index, lesson.cards.length - 1)];
   if (!w) return null;
-  const last = index >= wordCards.length - 1;
+  const last = index >= lesson.cards.length - 1;
   return (
     <div>
-      <p className="mb-3 text-sm font-bold text-muted-foreground">Card {index + 1} of {wordCards.length} · tap the card to see the meaning</p>
+      <p className="mb-3 text-sm font-bold text-muted-foreground">Card {index + 1} of {lesson.cards.length} · tap the card to see the meaning</p>
       <button key={w.id} onClick={() => setFlipped((f) => !f)} className="rise-in flex min-h-72 w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-b-8 border-border bg-card p-8 text-center shadow-sm transition hover:border-primary">
         <span className="text-6xl" aria-hidden>{w.icon}</span>
         {flipped ? (
@@ -89,13 +92,13 @@ function Cards({ index, setIndex, onDone }: { index: number; setIndex: (n: numbe
   );
 }
 
-function Story({ turn, setTurn, onDone }: { turn: number; setTurn: (n: number) => void; onDone: () => void }) {
+function Story({ lesson, turn, setTurn, onDone }: { lesson: Lesson; turn: number; setTurn: (n: number) => void; onDone: () => void }) {
   const [picked, setPicked] = useState<number | null>(null);
   // Show all turns up to the current reply point.
   let upto = turn;
-  while (storyTurns[upto]?.speaker === "them") upto++;
-  const visible = storyTurns.slice(0, upto);
-  const ask = storyTurns[upto];
+  while (lesson.story[upto]?.speaker === "them") upto++;
+  const visible = lesson.story.slice(0, upto);
+  const ask = lesson.story[upto];
   const finished = !ask;
 
   const choose = (i: number) => {
@@ -106,7 +109,7 @@ function Story({ turn, setTurn, onDone }: { turn: number; setTurn: (n: number) =
 
   return (
     <div>
-      <p className="mb-3 text-sm font-bold text-muted-foreground">Scene: {lessonMeta.scene}</p>
+      <p className="mb-3 text-sm font-bold text-muted-foreground">Scene: {lesson.scene}</p>
       <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-4 sm:p-6">
         {visible.map((t, i) => t.speaker === "them" ? (
           <div key={i} className="rise-in flex items-end gap-2">
@@ -138,11 +141,11 @@ function Story({ turn, setTurn, onDone }: { turn: number; setTurn: (n: number) =
   );
 }
 
-function Match({ matched, setMatched, onDone }: { matched: string[]; setMatched: (v: string[]) => void; onDone: () => void }) {
+function Match({ lesson, matched, setMatched, onDone }: { lesson: Lesson; matched: string[]; setMatched: (v: string[]) => void; onDone: () => void }) {
   const [left, setLeft] = useState<string | null>(null);
   const [miss, setMiss] = useState<string | null>(null);
-  const right = useMemo(() => [...wordCards].sort((a, b) => a.meaning.localeCompare(b.meaning)), []);
-  const all = matched.length === wordCards.length;
+  const right = useMemo(() => [...lesson.cards].sort((a, b) => a.meaning.localeCompare(b.meaning)), [lesson]);
+  const all = matched.length === lesson.cards.length;
 
   const pickRight = (id: string) => {
     if (!left) return;
@@ -153,10 +156,10 @@ function Match({ matched, setMatched, onDone }: { matched: string[]; setMatched:
 
   return (
     <div>
-      <p className="mb-3 text-sm font-bold text-muted-foreground">Tap an Igbo phrase, then its meaning. {matched.length} of {wordCards.length} matched.</p>
+      <p className="mb-3 text-sm font-bold text-muted-foreground">Tap an Igbo phrase, then its meaning. {matched.length} of {lesson.cards.length} matched.</p>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-3">
-          {wordCards.map((w) => <button key={w.id} disabled={matched.includes(w.id)} onClick={() => setLeft(w.id)} className={`${tile} w-full bg-card ${left === w.id ? "border-primary bg-secondary" : "border-border hover:border-primary"}`} lang="ig">{w.icon} {w.igbo}</button>)}
+          {lesson.cards.map((w) => <button key={w.id} disabled={matched.includes(w.id)} onClick={() => setLeft(w.id)} className={`${tile} w-full bg-card ${left === w.id ? "border-primary bg-secondary" : "border-border hover:border-primary"}`} lang="ig">{w.icon} {w.igbo}</button>)}
         </div>
         <div className="space-y-3">
           {right.map((w) => <button key={w.id} disabled={matched.includes(w.id)} onClick={() => pickRight(w.id)} className={`${tile} w-full bg-card ${miss === w.id ? "border-accent bg-accent/10" : "border-border hover:border-primary"}`}>{w.meaning}</button>)}
