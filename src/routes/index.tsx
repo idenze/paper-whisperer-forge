@@ -123,7 +123,7 @@ function Index() {
             ) : (
               <div className="flex items-center gap-1">
                 <Button variant="icon" onClick={() => goTab("Profile")} aria-label="Settings"><UserRound className="size-5" /></Button>
-                <Button asChild><Link to="/auth">Sign in</Link></Button>
+                <Button asChild className="whitespace-nowrap"><Link to="/auth">Sign in</Link></Button>
               </div>
             )}
           </div>
