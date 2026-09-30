@@ -30,7 +30,7 @@ export function PracticeGame({ rounds, mode, heading, onClose, onComplete }: Pra
         return {
           prompt: current.prompt,
           hint: current.hint,
-          options: current.options.map((_, position) => current.options[(position + shift) % total]),
+          options: current.options.slice(shift).concat(current.options.slice(0, shift)),
           correct: isFree ? (current.correct - shift + total) % total : current.correct,
         };
       }),

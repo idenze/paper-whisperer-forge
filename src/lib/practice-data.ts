@@ -237,6 +237,6 @@ export const practiceFocuses: readonly PracticeFocus[] = [
 ];
 
 /** One activity pulled from every focus, for a mixed run. */
-export const mixedRounds: readonly PracticeRound[] = practiceFocuses.map(
-  (focus) => focus.rounds[0],
-);
+export const mixedRounds: readonly PracticeRound[] = practiceFocuses
+  .map((focus) => focus.rounds[0])
+  .filter((round): round is PracticeRound => round !== undefined);
