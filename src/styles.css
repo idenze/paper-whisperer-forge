@@ -71,7 +71,13 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes practice-pulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  70%, 100% { transform: scale(1.18); opacity: 0; }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .rise-in { animation: rise-in 500ms ease-out both; }
   .rise-in-delay { animation: rise-in 600ms 120ms ease-out both; }
+  .practice-pulse { animation: practice-pulse 1.25s ease-out 2; }
 }
