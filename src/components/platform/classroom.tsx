@@ -45,7 +45,7 @@ export function Classroom({ lesson, role, onLeave }: { lesson: Lesson; role: "st
   const other = role === "student" ? lesson.teacherName : lesson.studentName;
   const otherPhoto = role === "student" ? lesson.teacherPhotoUrl : lesson.studentPhotoUrl;
   // "You": the real signed-in learner's profile image when available, otherwise the preview identity.
-  const selfPhoto = role === "student" ? user?.user_metadata?.["avatar_url"] : previewIdentity.teacher.photoUrl;
+  const selfPhoto = role === "student" ? user?.user_metadata?.["avatar_url"] ?? previewIdentity.student.photoUrl : previewIdentity.teacher.photoUrl;
   const selfName = role === "student" ? (user?.user_metadata?.["full_name"] as string | undefined) ?? previewIdentity.student.name : previewIdentity.teacher.name;
 
   return (
