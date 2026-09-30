@@ -181,6 +181,56 @@ export type Database = {
         }
         Relationships: []
       }
+      lesson_bookings: {
+        Row: {
+          created_at: string
+          id: string
+          learner_id: string
+          minutes: number
+          note: string
+          paid: boolean
+          payment_reference: string | null
+          price_kobo: number
+          starts_at: string
+          status: Database["public"]["Enums"]["booking_status"]
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          learner_id: string
+          minutes?: number
+          note?: string
+          paid?: boolean
+          payment_reference?: string | null
+          price_kobo?: number
+          starts_at: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          learner_id?: string
+          minutes?: number
+          note?: string
+          paid?: boolean
+          payment_reference?: string | null
+          price_kobo?: number
+          starts_at?: string
+          status?: Database["public"]["Enums"]["booking_status"]
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_bookings_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_progress: {
         Row: {
           completed_at: string | null
@@ -313,6 +363,155 @@ export type Database = {
         }
         Relationships: []
       }
+      school_hire_requests: {
+        Row: {
+          contact_email: string
+          created_at: string
+          id: string
+          requester_id: string
+          role_details: string
+          school_name: string
+          status: string
+          teacher_id: string
+        }
+        Insert: {
+          contact_email: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          role_details?: string
+          school_name: string
+          status?: string
+          teacher_id: string
+        }
+        Update: {
+          contact_email?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          role_details?: string
+          school_name?: string
+          status?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_hire_requests_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_profiles: {
+        Row: {
+          bio: string
+          country: string
+          created_at: string
+          currency: string
+          dialects: string[]
+          display_name: string
+          headline: string
+          hourly_rate_kobo: number
+          id: string
+          open_to_schools: boolean
+          photo_url: string | null
+          qualifications: string
+          specialties: string[]
+          status: Database["public"]["Enums"]["teacher_status"]
+          updated_at: string
+          user_id: string
+          video_url: string | null
+          years_experience: number
+        }
+        Insert: {
+          bio?: string
+          country?: string
+          created_at?: string
+          currency?: string
+          dialects?: string[]
+          display_name: string
+          headline?: string
+          hourly_rate_kobo?: number
+          id?: string
+          open_to_schools?: boolean
+          photo_url?: string | null
+          qualifications?: string
+          specialties?: string[]
+          status?: Database["public"]["Enums"]["teacher_status"]
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+          years_experience?: number
+        }
+        Update: {
+          bio?: string
+          country?: string
+          created_at?: string
+          currency?: string
+          dialects?: string[]
+          display_name?: string
+          headline?: string
+          hourly_rate_kobo?: number
+          id?: string
+          open_to_schools?: boolean
+          photo_url?: string | null
+          qualifications?: string
+          specialties?: string[]
+          status?: Database["public"]["Enums"]["teacher_status"]
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+          years_experience?: number
+        }
+        Relationships: []
+      }
+      teacher_reviews: {
+        Row: {
+          booking_id: string
+          comment: string
+          created_at: string
+          id: string
+          rating: number
+          reviewer_id: string
+          teacher_id: string
+        }
+        Insert: {
+          booking_id: string
+          comment?: string
+          created_at?: string
+          id?: string
+          rating: number
+          reviewer_id: string
+          teacher_id: string
+        }
+        Update: {
+          booking_id?: string
+          comment?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          reviewer_id?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "lesson_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_reviews_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -333,7 +532,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      teacher_ratings: {
+        Row: {
+          avg_rating: number | null
+          review_count: number | null
+          teacher_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_reviews_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {
@@ -347,7 +561,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "linguist" | "editor"
+      booking_status: "requested" | "confirmed" | "completed" | "cancelled"
       content_status: "draft" | "in_review" | "published" | "rejected"
+      teacher_status: "pending" | "approved" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -476,7 +692,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "linguist", "editor"],
+      booking_status: ["requested", "confirmed", "completed", "cancelled"],
       content_status: ["draft", "in_review", "published", "rejected"],
+      teacher_status: ["pending", "approved", "suspended"],
     },
   },
 } as const
