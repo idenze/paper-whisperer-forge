@@ -23,7 +23,8 @@ import { LessonFlow } from "@/components/lesson-flow";
 import { useStickyState } from "@/lib/use-sticky-state";
 import { PracticeView } from "@/components/practice-view";
 import { TutorView } from "@/components/tutor-view";
-import { journey, learner, units } from "@/lib/learning-data";
+import { journey, learner } from "@/lib/learning-data";
+import { allLessons, findLesson, lessonStatus, units } from "@/lib/lesson-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -53,7 +54,12 @@ const navItems = [
 
 function Index() {
   const [activeTab, setActiveTab] = useStickyState<Tab>("tab", "Home");
-  const [lessonOpen, setLessonOpen] = useStickyState("lesson:open", false);
+  const [openLessonId, setOpenLessonId] = useStickyState<string | null>("lesson:openId", null);
+  const [lessonsDone, setLessonsDone] = useStickyState<string[]>("lesson:done", ["welcome"]);
+  const openLesson = findLesson(openLessonId);
+  const lessonOpen = openLesson !== null;
+  const currentLesson = allLessons.find((l) => !lessonsDone.includes(l.id)) ?? allLessons[0];
+  const setLessonOpen = (v: boolean) => setOpenLessonId(v ? currentLesson?.id ?? null : null);
   const [completed, setCompleted] = useStickyState<string[]>("lesson:completed", []);
 
   const markDone = (id: string) => {
@@ -109,8 +115,10 @@ function Index() {
         </section>
         )}
 
-        {lessonOpen ? (
-          <LessonFlow onClose={() => setLessonOpen(false)} onComplete={() => markDone("continue")} />
+        {openLesson ? (
+          <LessonFlow key={openLesson.id} lesson={openLesson} onClose={() => setOpenLessonId(null)}
+            onComplete={() => { markDone("continue"); setLessonsDone((d) => d.includes(openLesson.id) ? d : [...d, openLesson.id]); }}
+            onNext={(() => { const i = allLessons.findIndex((l) => l.id === openLesson.id); const nx = allLessons[i + 1]; return nx ? () => setOpenLessonId(nx.id) : undefined; })()} />
         ) : activeTab === "Tutor" ? (
           <TutorView />
         ) : activeTab === "Practise" ? (
@@ -164,7 +172,7 @@ function Index() {
                 </>
               )}
 
-              <CoursePath onStart={() => setLessonOpen(true)} expanded={activeTab === "Learn"} />
+              <CoursePath completed={lessonsDone} onOpen={(id) => setOpenLessonId(id)} expanded={activeTab === "Learn"} />
             </div>
 
             <aside className="space-y-5 xl:sticky xl:top-26">
@@ -209,7 +217,7 @@ function Index() {
   );
 }
 
-function CoursePath({ onStart, expanded }: { onStart: () => void; expanded: boolean }) {
+function CoursePath({ completed, onOpen, expanded }: { completed: string[]; onOpen: (id: string) => void; expanded: boolean }) {
   return (
     <section aria-labelledby="path-heading" className={expanded ? "pt-1" : ""}>
       <div className="mb-4"><p className="text-xs font-bold uppercase text-muted-foreground">Level 0 · Foundations</p><h2 id="path-heading" className="mt-1 font-display text-2xl font-semibold">Your learning path</h2></div>
