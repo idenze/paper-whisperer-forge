@@ -1,5 +1,5 @@
 import { ArrowLeft, Banknote, Building2, CalendarDays, Check, Clock, GraduationCap, ShieldCheck, Star, UserRound, Video, Wallet } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Button } from "@/components/button";
 import { sampleApplications, sampleHires, sampleLearnerBookings, sampleReviews, sampleTeacherBookings, type SampleBooking } from "@/lib/teacher-samples";
 
@@ -83,7 +83,7 @@ function TeacherDash() {
             <p className="text-xs text-muted-foreground">Tap to open or close a slot.</p>
             <div className="mt-3 grid grid-cols-[auto_repeat(7,1fr)] gap-1 text-center text-[10px] font-bold">
               <span />{days.map((d) => <span key={d}>{d.slice(0, 2)}</span>)}
-              {hours.map((h) => <>{<span key={`h${h}`} className="pr-1 text-right">{h}:00</span>}{days.map((d) => { const k = `${d}-${h}`, on = slots.includes(k); return <button key={k} aria-label={`${d} ${h}:00`} onClick={() => setSlots((s) => on ? s.filter((x) => x !== k) : [...s, k])} className={`h-6 rounded-sm ${on ? "bg-primary" : "bg-muted"}`} />; })}</>)}
+              {hours.map((h) => <Fragment key={h}><span className="pr-1 text-right">{h}:00</span>{days.map((d) => { const k = `${d}-${h}`, on = slots.includes(k); return <button key={k} aria-label={`${d} ${h}:00`} onClick={() => setSlots((s) => on ? s.filter((x) => x !== k) : [...s, k])} className={`h-6 rounded-sm ${on ? "bg-primary" : "bg-muted"}`} />; })}</Fragment>)}
             </div>
           </section>
         </div>
