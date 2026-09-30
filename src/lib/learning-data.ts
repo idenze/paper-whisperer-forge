@@ -16,28 +16,4 @@ export const journey = [
   { id: "practice", title: "Quick practice", detail: "Multiple choice · 3 min", action: "Play", icon: MessagesSquare, tone: "ink" },
 ] as const;
 
-export const units = [
-  {
-    number: 1,
-    title: "First conversations",
-    detail: "4 of 6 lessons",
-    progress: 68,
-    lessons: [
-      { title: "Welcome", status: "done" },
-      { title: "Greetings", status: "current" },
-      { title: "Introducing yourself", status: "open" },
-      { title: "Polite expressions", status: "open" },
-    ],
-  },
-  {
-    number: 2,
-    title: "People around me",
-    detail: "6 lessons",
-    progress: 0,
-    lessons: [
-      { title: "Family", status: "locked" },
-      { title: "Friends", status: "locked" },
-      { title: "Asking names", status: "locked" },
-    ],
-  },
-] as const;
+// Course units and lessons live in ./lesson-data.ts

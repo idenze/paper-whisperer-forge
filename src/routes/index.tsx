@@ -23,7 +23,8 @@ import { LessonFlow } from "@/components/lesson-flow";
 import { useStickyState } from "@/lib/use-sticky-state";
 import { PracticeView } from "@/components/practice-view";
 import { TutorView } from "@/components/tutor-view";
-import { journey, learner, units } from "@/lib/learning-data";
+import { journey, learner } from "@/lib/learning-data";
+import { allLessons, findLesson, lessonStatus, units } from "@/lib/lesson-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -53,7 +54,12 @@ const navItems = [
 
 function Index() {
   const [activeTab, setActiveTab] = useStickyState<Tab>("tab", "Home");
-  const [lessonOpen, setLessonOpen] = useStickyState("lesson:open", false);
+  const [openLessonId, setOpenLessonId] = useStickyState<string | null>("lesson:openId", null);
+  const [lessonsDone, setLessonsDone] = useStickyState<string[]>("lesson:done", ["welcome"]);
+  const openLesson = findLesson(openLessonId);
+  const lessonOpen = openLesson !== null;
+  const currentLesson = allLessons.find((l) => !lessonsDone.includes(l.id)) ?? allLessons[0];
+  const setLessonOpen = (v: boolean) => setOpenLessonId(v ? currentLesson?.id ?? null : null);
   const [completed, setCompleted] = useStickyState<string[]>("lesson:completed", []);
 
   const markDone = (id: string) => {
@@ -109,8 +115,10 @@ function Index() {
         </section>
         )}
 
-        {lessonOpen ? (
-          <LessonFlow onClose={() => setLessonOpen(false)} onComplete={() => markDone("continue")} />
+        {openLesson ? (
+          <LessonFlow key={openLesson.id} lesson={openLesson} onClose={() => setOpenLessonId(null)}
+            onComplete={() => { markDone("continue"); setLessonsDone((d) => d.includes(openLesson.id) ? d : [...d, openLesson.id]); }}
+            onNext={(() => { const i = allLessons.findIndex((l) => l.id === openLesson.id); const nx = allLessons[i + 1]; return nx ? () => setOpenLessonId(nx.id) : undefined; })()} />
         ) : activeTab === "Tutor" ? (
           <TutorView />
         ) : activeTab === "Practise" ? (
@@ -164,7 +172,7 @@ function Index() {
                 </>
               )}
 
-              <CoursePath onStart={() => setLessonOpen(true)} expanded={activeTab === "Learn"} />
+              <CoursePath completed={lessonsDone} onOpen={(id) => setOpenLessonId(id)} expanded={activeTab === "Learn"} />
             </div>
 
             <aside className="space-y-5 xl:sticky xl:top-26">
@@ -209,25 +217,29 @@ function Index() {
   );
 }
 
-function CoursePath({ onStart, expanded }: { onStart: () => void; expanded: boolean }) {
+function CoursePath({ completed, onOpen, expanded }: { completed: string[]; onOpen: (id: string) => void; expanded: boolean }) {
   return (
     <section aria-labelledby="path-heading" className={expanded ? "pt-1" : ""}>
       <div className="mb-4"><p className="text-xs font-bold uppercase text-muted-foreground">Level 0 · Foundations</p><h2 id="path-heading" className="mt-1 font-display text-2xl font-semibold">Your learning path</h2></div>
       <div className="space-y-3">
-        {units.map((unit) => <article key={unit.number} className="rounded-md border border-border bg-card p-5 shadow-sm">
+        {units.map((unit) => {
+          const done = unit.lessons.filter((l) => completed.includes(l.id)).length;
+          const progress = Math.round((done / unit.lessons.length) * 100);
+          const unitOpen = unit.lessons.some((l) => lessonStatus(l.id, completed) !== "locked");
+          return <article key={unit.number} className="rounded-md border border-border bg-card p-5 shadow-sm">
           <div className="flex items-start gap-4">
-            <div className={`grid size-11 shrink-0 place-items-center rounded-md font-black ${unit.progress ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{unit.number}</div>
+            <div className={`grid size-11 shrink-0 place-items-center rounded-md font-black ${unitOpen ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{unit.number}</div>
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="font-display text-xl font-semibold">{unit.title}</h3><p className="text-sm text-muted-foreground">{unit.detail}</p></div><span className="text-xs font-bold text-muted-foreground">{unit.progress}%</span></div>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${unit.progress}%` }} /></div>
-              {(expanded || unit.number === 1) && <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                {unit.lessons.map((lesson) => <button key={lesson.title} disabled={lesson.status === "locked"} onClick={lesson.status === "current" ? onStart : undefined} className={`flex min-h-12 items-center gap-3 rounded-md border px-3 text-left text-sm font-bold transition ${lesson.status === "current" ? "border-primary bg-secondary text-secondary-foreground" : "border-border bg-background disabled:opacity-55"}`}>
-                  <span className={`grid size-7 shrink-0 place-items-center rounded-full ${lesson.status === "done" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{lesson.status === "done" ? <Check className="size-3.5" /> : lesson.status === "locked" ? <LockKeyhole className="size-3.5" /> : <BookOpen className="size-3.5" />}</span>{lesson.title}
-                </button>)}
+              <div className="flex flex-wrap items-center justify-between gap-2"><div><h3 className="font-display text-xl font-semibold">{unit.title}</h3><p className="text-sm text-muted-foreground">{done} of {unit.lessons.length} lessons</p></div><span className="text-xs font-bold text-muted-foreground">{progress}%</span></div>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} /></div>
+              {(expanded || unitOpen) && <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                {unit.lessons.map((lesson) => { const status = lessonStatus(lesson.id, completed); return <button key={lesson.id} disabled={status === "locked"} onClick={() => onOpen(lesson.id)} className={`flex min-h-12 items-center gap-3 rounded-md border px-3 text-left text-sm font-bold transition ${status === "current" ? "border-primary bg-secondary text-secondary-foreground" : "border-border bg-background hover:border-primary disabled:opacity-55 disabled:hover:border-border"}`}>
+                  <span className={`grid size-7 shrink-0 place-items-center rounded-full ${status === "done" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{status === "done" ? <Check className="size-3.5" /> : status === "locked" ? <LockKeyhole className="size-3.5" /> : <BookOpen className="size-3.5" />}</span><span className="flex-1">{lesson.title}</span>{status === "done" && <span className="text-xs font-bold text-muted-foreground">Replay</span>}
+                </button>; })}
               </div>}
             </div>
           </div>
-        </article>)}
+        </article>; })}
       </div>
     </section>
   );

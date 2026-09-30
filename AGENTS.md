@@ -16,3 +16,5 @@
 - Keep Ndebe input mapping and glyph output replaceable; use explicit prototype notation until the licensed font and verified mapping data are supplied.
 - Keep lesson practice multimodal and context-led rather than duplicating the external dictionary-generated multiple-choice drill.
 - Keep free Practise sessions separate from lesson activities: practise is repeatable, learner-chosen, and never advances the course path.
+- Course units and lessons live in src/lib/lesson-data.ts and render through LessonFlow (cards → chat → match → culture note); lessons unlock in order — one data source for the whole path.
+- Learner place is saved per device via useStickyState (localStorage, `ozituma:` prefix) until accounts sync progress server-side.
