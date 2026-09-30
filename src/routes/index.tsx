@@ -19,10 +19,10 @@ import { useState } from "react";
 import { Button } from "@/components/button";
 import { NdebeStudio } from "@/components/ndebe-studio";
 import { OzitumaMark } from "@/components/ozituma-mark";
-import { PracticeGame } from "@/components/practice-game";
+import { LessonFlow } from "@/components/lesson-flow";
+import { useStickyState } from "@/lib/use-sticky-state";
 import { PracticeView } from "@/components/practice-view";
 import { TutorView } from "@/components/tutor-view";
-import { lessonRounds } from "@/lib/practice-data";
 import { journey, learner, units } from "@/lib/learning-data";
 
 export const Route = createFileRoute("/")({
@@ -52,9 +52,9 @@ const navItems = [
 ] as const;
 
 function Index() {
-  const [activeTab, setActiveTab] = useState<Tab>("Home");
-  const [lessonOpen, setLessonOpen] = useState(false);
-  const [completed, setCompleted] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useStickyState<Tab>("tab", "Home");
+  const [lessonOpen, setLessonOpen] = useStickyState("lesson:open", false);
+  const [completed, setCompleted] = useStickyState<string[]>("lesson:completed", []);
 
   const markDone = (id: string) => {
     setCompleted((items) => (items.includes(id) ? items : [...items, id]));
@@ -110,7 +110,7 @@ function Index() {
         )}
 
         {lessonOpen ? (
-          <PracticeGame rounds={lessonRounds} mode="lesson" onClose={() => setLessonOpen(false)} onComplete={() => markDone("continue")} />
+          <LessonFlow onClose={() => setLessonOpen(false)} onComplete={() => markDone("continue")} />
         ) : activeTab === "Tutor" ? (
           <TutorView />
         ) : activeTab === "Practise" ? (

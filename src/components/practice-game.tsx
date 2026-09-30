@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/button";
 import { foldIgboText, normalizeIgboText } from "@/lib/igbo-text";
 import type { PracticeRound } from "@/lib/practice-data";
+import { useStickyState } from "@/lib/use-sticky-state";
 
 type PracticeGameProps = {
   rounds: readonly PracticeRound[];
@@ -11,6 +12,8 @@ type PracticeGameProps = {
   heading?: string;
   onClose: () => void;
   onComplete: () => void;
+  /** Saves place on this device so learners resume where they stopped. */
+  storageKey?: string;
 };
 
 type Verdict = "correct" | "tones" | "wrong";
@@ -30,14 +33,14 @@ export function checkTyped(input: string, answer: string): Verdict {
   return "wrong";
 }
 
-export function PracticeGame({ rounds, mode, heading, onClose, onComplete }: PracticeGameProps) {
-  const [round, setRound] = useState(0);
+export function PracticeGame({ rounds, mode, heading, onClose, onComplete, storageKey }: PracticeGameProps) {
+  const [round, setRound] = useStickyState(storageKey ? `${storageKey}:round` : null, 0);
   const [selected, setSelected] = useState<number | null>(null);
   const [typed, setTyped] = useState("");
   const [verdict, setVerdict] = useState<Verdict | null>(null);
   const [audioPlayed, setAudioPlayed] = useState(false);
-  const [finished, setFinished] = useState(false);
-  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useStickyState(storageKey ? `${storageKey}:finished` : null, false);
+  const [score, setScore] = useStickyState(storageKey ? `${storageKey}:score` : null, 0);
   const [spin, setSpin] = useState(0);
   const [confirmExit, setConfirmExit] = useState(false);
   const rootRef = useRef<HTMLElement>(null);
@@ -59,9 +62,8 @@ export function PracticeGame({ rounds, mode, heading, onClose, onComplete }: Pra
   const current = views[round] ?? views[0];
   const total = views.length;
   const checked = verdict !== null;
-  const started = round > 0 || checked;
 
-  const exit = () => { if (started && !finished && !confirmExit) setConfirmExit(true); else onClose(); };
+  const exit = () => onClose();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") exit(); };
@@ -116,7 +118,7 @@ export function PracticeGame({ rounds, mode, heading, onClose, onComplete }: Pra
 
       {confirmExit && (
         <div className="mb-4 flex flex-wrap items-center gap-3 rounded-md border border-accent bg-accent/10 p-4" role="alertdialog" aria-label="Leave this session?">
-          <p className="flex-1 text-sm font-bold">Leave now? Your progress in this session won’t be kept.</p>
+          <p className="flex-1 text-sm font-bold">Leave now? Your place is saved — you’ll pick up from this question next time.</p>
           <Button variant="secondary" onClick={() => setConfirmExit(false)}>Keep going</Button>
           <Button onClick={onClose}><X className="size-4" /> Leave</Button>
         </div>

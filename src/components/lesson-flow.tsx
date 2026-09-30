@@ -1,0 +1,168 @@
+import { ArrowLeft, ArrowRight, Check, MessagesSquare, Puzzle, RotateCcw, Sparkles, Volume2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/button";
+import { lessonMeta, storyTurns, wordCards } from "@/lib/lesson-data";
+import { useStickyState } from "@/lib/use-sticky-state";
+
+type Stage = "cards" | "story" | "match" | "done";
+const stages: { id: Stage; label: string; icon: typeof Sparkles }[] = [
+  { id: "cards", label: "Learn", icon: Sparkles },
+  { id: "story", label: "Chat", icon: MessagesSquare },
+  { id: "match", label: "Match", icon: Puzzle },
+];
+
+export function LessonFlow({ onClose, onComplete }: { onClose: () => void; onComplete: () => void }) {
+  const [stage, setStage] = useStickyState<Stage>("lesson:stage", "cards");
+  const [card, setCard] = useStickyState("lesson:card", 0);
+  const [turn, setTurn] = useStickyState("lesson:turn", 0);
+  const [matched, setMatched] = useStickyState<string[]>("lesson:matched", []);
+
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); }, [stage]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const stageIndex = stages.findIndex((s) => s.id === stage);
+  const restart = () => { setStage("cards"); setCard(0); setTurn(0); setMatched([]); };
+
+  return (
+    <section className="rise-in mx-auto max-w-3xl" aria-labelledby="lesson-title">
+      <div className="sticky top-16 z-30 mb-4 flex items-center gap-3 rounded-md border border-border bg-card/95 px-2 py-2 shadow-sm backdrop-blur sm:top-20">
+        <Button variant="ghost" onClick={onClose} className="shrink-0"><ArrowLeft className="size-4" /> Back to journey</Button>
+        <ol className="flex flex-1 items-center gap-1.5">
+          {stages.map(({ id, label, icon: Icon }, i) => {
+            const done = stage === "done" || i < stageIndex;
+            return (
+              <li key={id} className={`flex flex-1 items-center justify-center gap-1.5 rounded-full px-2 py-1.5 text-xs font-extrabold ${done ? "bg-primary text-primary-foreground" : i === stageIndex ? "bg-secondary text-secondary-foreground" : "bg-muted text-muted-foreground"}`}>
+                {done ? <Check className="size-3.5" /> : <Icon className="size-3.5" />}<span className="hidden sm:inline">{label}</span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+
+      <p className="mb-1 text-xs font-extrabold uppercase text-primary">{lessonMeta.unit} · Placeholder content</p>
+      <h1 id="lesson-title" className="mb-5 font-display text-3xl font-semibold">{lessonMeta.title}</h1>
+
+      {stage === "cards" && <Cards index={card} setIndex={setCard} onDone={() => setStage("story")} />}
+      {stage === "story" && <Story turn={turn} setTurn={setTurn} onDone={() => setStage("match")} />}
+      {stage === "match" && <Match matched={matched} setMatched={setMatched} onDone={() => { setStage("done"); onComplete(); }} />}
+      {stage === "done" && (
+        <div className="rounded-lg border border-border bg-card px-6 py-12 text-center shadow-sm">
+          <span className="mx-auto grid size-20 place-items-center rounded-full bg-secondary text-primary"><Check className="size-10" strokeWidth={3} /></span>
+          <h2 className="mt-5 font-display text-3xl font-semibold">Lesson complete</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">You learned {wordCards.length} phrases, used them in a chat, and matched them all.</p>
+          <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+            <Button variant="secondary" onClick={restart}><RotateCcw className="size-4" /> Do it again</Button>
+            <Button onClick={() => { restart(); onClose(); }}>Back to journey</Button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function Cards({ index, setIndex, onDone }: { index: number; setIndex: (n: number) => void; onDone: () => void }) {
+  const [flipped, setFlipped] = useState(false);
+  const w = wordCards[Math.min(index, wordCards.length - 1)];
+  if (!w) return null;
+  const last = index >= wordCards.length - 1;
+  return (
+    <div>
+      <p className="mb-3 text-sm font-bold text-muted-foreground">Card {index + 1} of {wordCards.length} · tap the card to see the meaning</p>
+      <button key={w.id} onClick={() => setFlipped((f) => !f)} className="rise-in flex min-h-72 w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-b-8 border-border bg-card p-8 text-center shadow-sm transition hover:border-primary">
+        <span className="text-6xl" aria-hidden>{w.icon}</span>
+        {flipped ? (
+          <><p className="font-display text-2xl font-semibold">{w.meaning}</p><p className="max-w-sm text-sm text-muted-foreground">{w.note}</p></>
+        ) : (
+          <p className="font-display text-3xl font-semibold" lang="ig">{w.igbo}</p>
+        )}
+      </button>
+      <div className="mt-4 flex items-center justify-between gap-3">
+        <Button variant="secondary" disabled={index === 0} onClick={() => { setFlipped(false); setIndex(index - 1); }}><ArrowLeft className="size-4" /> Previous</Button>
+        <Button variant="ghost" aria-label="Play placeholder audio"><Volume2 className="size-5" /> Listen</Button>
+        <Button onClick={() => { setFlipped(false); if (last) onDone(); else setIndex(index + 1); }}>{last ? "Start the chat" : "Next"} <ArrowRight className="size-4" /></Button>
+      </div>
+    </div>
+  );
+}
+
+function Story({ turn, setTurn, onDone }: { turn: number; setTurn: (n: number) => void; onDone: () => void }) {
+  const [picked, setPicked] = useState<number | null>(null);
+  // Show all turns up to the current reply point.
+  let upto = turn;
+  while (storyTurns[upto]?.speaker === "them") upto++;
+  const visible = storyTurns.slice(0, upto);
+  const ask = storyTurns[upto];
+  const finished = !ask;
+
+  const choose = (i: number) => {
+    if (!ask || ask.speaker !== "you" || picked !== null) return;
+    setPicked(i);
+    if (i === ask.correct) setTimeout(() => { setPicked(null); setTurn(upto + 1); }, 900);
+  };
+
+  return (
+    <div>
+      <p className="mb-3 text-sm font-bold text-muted-foreground">Scene: {lessonMeta.scene}</p>
+      <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-4 sm:p-6">
+        {visible.map((t, i) => t.speaker === "them" ? (
+          <div key={i} className="rise-in flex items-end gap-2">
+            <span className="grid size-10 place-items-center rounded-full bg-card text-2xl" aria-hidden>{t.avatar}</span>
+            <div className="max-w-[75%] rounded-lg rounded-bl-none bg-card px-4 py-3 shadow-sm"><p className="font-bold" lang="ig">{t.line}</p><p className="text-xs text-muted-foreground">{t.meaning}</p></div>
+          </div>
+        ) : (
+          <div key={i} className="rise-in flex justify-end">
+            <div className="max-w-[75%] rounded-lg rounded-br-none bg-primary px-4 py-3 text-primary-foreground shadow-sm"><p className="font-bold" lang="ig">{t.options[t.correct]?.text}</p></div>
+          </div>
+        ))}
+      </div>
+      {ask && ask.speaker === "you" && (
+        <div className="mt-4">
+          <p className="mb-2 font-display text-xl font-semibold">{ask.prompt}</p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {ask.options.map((o, i) => {
+              const state = picked === null ? "" : i === ask.correct && picked === i ? "border-primary bg-secondary" : picked === i ? "border-accent bg-accent/10" : "";
+              return <button key={i} onClick={() => choose(i)} className={`rounded-md border-2 border-b-4 border-border bg-card p-3 text-left transition hover:border-primary ${state}`}><span className="block font-bold" lang="ig">{o.text}</span><span className="text-xs text-muted-foreground">{o.meaning}</span></button>;
+            })}
+          </div>
+          {picked !== null && picked !== ask.correct && (
+            <div className="mt-3 flex items-center justify-between gap-3 rounded-md bg-accent/10 p-3 text-sm"><span>Not quite — {ask.why}</span><Button variant="secondary" onClick={() => setPicked(null)}>Try again</Button></div>
+          )}
+        </div>
+      )}
+      {finished && <div className="mt-4 flex justify-end"><Button onClick={onDone}>Play matching pairs <ArrowRight className="size-4" /></Button></div>}
+    </div>
+  );
+}
+
+function Match({ matched, setMatched, onDone }: { matched: string[]; setMatched: (v: string[]) => void; onDone: () => void }) {
+  const [left, setLeft] = useState<string | null>(null);
+  const [miss, setMiss] = useState<string | null>(null);
+  const right = useMemo(() => [...wordCards].sort((a, b) => a.meaning.localeCompare(b.meaning)), []);
+  const all = matched.length === wordCards.length;
+
+  const pickRight = (id: string) => {
+    if (!left) return;
+    if (id === left) { setMatched([...matched, id]); setLeft(null); }
+    else { setMiss(id); setTimeout(() => setMiss(null), 600); }
+  };
+  const tile = "min-h-16 rounded-md border-2 border-b-4 p-3 text-left font-bold transition disabled:opacity-40";
+
+  return (
+    <div>
+      <p className="mb-3 text-sm font-bold text-muted-foreground">Tap an Igbo phrase, then its meaning. {matched.length} of {wordCards.length} matched.</p>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-3">
+          {wordCards.map((w) => <button key={w.id} disabled={matched.includes(w.id)} onClick={() => setLeft(w.id)} className={`${tile} w-full bg-card ${left === w.id ? "border-primary bg-secondary" : "border-border hover:border-primary"}`} lang="ig">{w.icon} {w.igbo}</button>)}
+        </div>
+        <div className="space-y-3">
+          {right.map((w) => <button key={w.id} disabled={matched.includes(w.id)} onClick={() => pickRight(w.id)} className={`${tile} w-full bg-card ${miss === w.id ? "border-accent bg-accent/10" : "border-border hover:border-primary"}`}>{w.meaning}</button>)}
+        </div>
+      </div>
+      {all && <div className="mt-5 flex justify-end"><Button onClick={onDone}>Finish lesson <Check className="size-4" /></Button></div>}
+    </div>
+  );
+}
