@@ -14,12 +14,12 @@ import {
   Trophy,
   UserRound,
   Volume2,
-  X,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/button";
 import { NdebeStudio } from "@/components/ndebe-studio";
 import { OzitumaMark } from "@/components/ozituma-mark";
+import { PracticeGame } from "@/components/practice-game";
 import { TutorView } from "@/components/tutor-view";
 import { journey, learner, units } from "@/lib/learning-data";
 
@@ -52,7 +52,6 @@ const navItems = [
 function Index() {
   const [activeTab, setActiveTab] = useState<Tab>("Home");
   const [lessonOpen, setLessonOpen] = useState(false);
-  const [answer, setAnswer] = useState<number | null>(null);
   const [completed, setCompleted] = useState<string[]>([]);
 
   const markDone = (id: string) => {
@@ -123,7 +122,7 @@ function Index() {
                         <div className="mb-8 flex items-center gap-2 text-xs font-extrabold uppercase text-brand-foreground/75"><span className="h-px w-8 bg-highlight" /> Unit 1 · Lesson 2</div>
                         <h2 className="font-display text-3xl font-semibold sm:text-4xl">Continue: Greetings</h2>
                         <p className="mt-3 max-w-lg text-sm leading-6 text-brand-foreground/80">Pick up where you left off with a short listening and recognition exercise.</p>
-                        <Button className="mt-7 bg-highlight text-highlight-foreground hover:bg-highlight/90" onClick={() => { setLessonOpen(true); setAnswer(null); }}>
+                        <Button className="mt-7 bg-highlight text-highlight-foreground hover:bg-highlight/90" onClick={() => setLessonOpen(true)}>
                           Continue lesson <ArrowRight className="size-4" />
                         </Button>
                       </div>
@@ -198,7 +197,7 @@ function Index() {
         )}
       </nav>
 
-      {lessonOpen && <LessonDialog answer={answer} setAnswer={setAnswer} onClose={() => setLessonOpen(false)} onComplete={() => { markDone("continue"); setLessonOpen(false); }} />}
+      {lessonOpen && <PracticeGame onClose={() => setLessonOpen(false)} onComplete={() => markDone("continue")} />}
     </div>
   );
 }
@@ -231,13 +230,3 @@ function ComingSoon({ tab, onBack }: { tab: Exclude<Tab, "Home" | "Learn">; onBa
   return <section className="mx-auto max-w-2xl py-24 text-center"><span className="mx-auto grid size-14 place-items-center rounded-md bg-secondary text-secondary-foreground"><Sparkles className="size-6" /></span><p className="mt-6 text-xs font-bold uppercase text-primary">First milestone</p><h1 className="mt-2 font-display text-4xl font-semibold">{tab} is taking shape.</h1><p className="mx-auto mt-4 max-w-lg text-muted-foreground">This area is reserved in the learning experience and will be connected when approved content and services are ready.</p><Button className="mt-7" onClick={onBack}>Return home</Button></section>;
 }
 
-function LessonDialog({ answer, setAnswer, onClose, onComplete }: { answer: number | null; setAnswer: (value: number) => void; onClose: () => void; onComplete: () => void }) {
-  return <div className="fixed inset-0 z-50 grid place-items-end bg-foreground/35 p-0 sm:place-items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="lesson-title">
-    <div className="w-full max-w-xl rounded-t-lg bg-card p-5 shadow-2xl sm:rounded-lg sm:p-7">
-      <div className="flex items-start justify-between gap-4"><div><span className="inline-flex rounded-sm bg-muted px-2 py-1 text-[10px] font-black uppercase text-muted-foreground">Placeholder content</span><h2 id="lesson-title" className="mt-3 font-display text-3xl font-semibold">Listening check</h2><p className="mt-2 text-sm text-muted-foreground">A structure preview. Approved recordings and language will replace this demonstration.</p></div><Button variant="icon" onClick={onClose} aria-label="Close lesson"><X className="size-5" /></Button></div>
-      <button className="mt-6 flex w-full items-center justify-center gap-3 rounded-md bg-brand px-4 py-6 font-bold text-brand-foreground" aria-label="Play placeholder audio"><Volume2 className="size-5" /> Play sample audio</button>
-      <fieldset className="mt-6"><legend className="mb-3 text-sm font-extrabold">Choose the matching meaning</legend><div className="grid gap-2">{["PLACEHOLDER option A", "PLACEHOLDER option B", "PLACEHOLDER option C"].map((option, index) => <button key={option} onClick={() => setAnswer(index)} className={`min-h-12 rounded-md border px-4 text-left text-sm font-semibold ${answer === index ? "border-primary bg-secondary" : "border-border bg-background"}`}>{String.fromCharCode(65 + index)}. {option}</button>)}</div></fieldset>
-      <Button className="mt-6 w-full" disabled={answer === null} onClick={onComplete}>Check and continue <ArrowRight className="size-4" /></Button>
-    </div>
-  </div>;
-}

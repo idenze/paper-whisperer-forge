@@ -14,3 +14,4 @@
 - Normalize all language input to Unicode NFC and use diacritic-insensitive matching only as a search aid.
 - Keep Tutor answers as clearly labelled interface samples until approved curriculum and audio are connected, because generated teaching claims must not be presented as verified.
 - Keep Ndebe input mapping and glyph output replaceable; use explicit prototype notation until the licensed font and verified mapping data are supplied.
+- Keep lesson practice multimodal and context-led rather than duplicating the external dictionary-generated multiple-choice drill.
