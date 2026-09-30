@@ -20,7 +20,9 @@ import { Button } from "@/components/button";
 import { NdebeStudio } from "@/components/ndebe-studio";
 import { OzitumaMark } from "@/components/ozituma-mark";
 import { PracticeGame } from "@/components/practice-game";
+import { PracticeView } from "@/components/practice-view";
 import { TutorView } from "@/components/tutor-view";
+import { lessonRounds } from "@/lib/practice-data";
 import { journey, learner, units } from "@/lib/learning-data";
 
 export const Route = createFileRoute("/")({
@@ -37,12 +39,12 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Tab = "Home" | "Learn" | "Tutor" | "Ndebe" | "Profile";
+type Tab = "Home" | "Learn" | "Practise" | "Tutor" | "Ndebe" | "Profile";
 
 const navItems = [
   { label: "Home", icon: Home },
   { label: "Learn", icon: BookOpen },
-  { label: "Practise", icon: Sparkles, href: "https://ozituma.com/practice" },
+  { label: "Practise", icon: Sparkles },
   { label: "Tutor", icon: MessageCircle },
   { label: "Ndebe", icon: SquarePen },
   { label: "Dictionary", icon: Search, href: "https://ozituma.com/" },
@@ -107,6 +109,8 @@ function Index() {
 
         {activeTab === "Tutor" ? (
           <TutorView />
+        ) : activeTab === "Practise" ? (
+          <PracticeView />
         ) : activeTab === "Ndebe" ? (
           <NdebeStudio />
         ) : activeTab !== "Home" && activeTab !== "Learn" ? (
@@ -197,7 +201,7 @@ function Index() {
         )}
       </nav>
 
-      {lessonOpen && <PracticeGame onClose={() => setLessonOpen(false)} onComplete={() => markDone("continue")} />}
+      {lessonOpen && <PracticeGame rounds={lessonRounds} mode="lesson" onClose={() => setLessonOpen(false)} onComplete={() => markDone("continue")} />}
     </div>
   );
 }
