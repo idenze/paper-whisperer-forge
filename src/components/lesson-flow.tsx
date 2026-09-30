@@ -11,7 +11,7 @@ const stages: { id: Stage; label: string; icon: typeof Sparkles }[] = [
   { id: "match", label: "Match", icon: Puzzle },
 ];
 
-export function LessonFlow({ lesson, onClose, onComplete, onNext }: { lesson: Lesson; onClose: () => void; onComplete: () => void; onNext?: () => void }) {
+export function LessonFlow({ lesson, onClose, onComplete, onNext }: { lesson: Lesson; onClose: () => void; onComplete: () => void; onNext?: (() => void) | undefined }) {
   const k = `lesson:${lesson.id}`;
   const [stage, setStage] = useStickyState<Stage>(`${k}:stage`, "cards");
   const [card, setCard] = useStickyState(`${k}:card`, 0);
