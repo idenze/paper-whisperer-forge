@@ -2,6 +2,7 @@ import { ArrowLeft, Banknote, Building2, CalendarDays, Check, Clock, GraduationC
 import { Fragment, useState } from "react";
 import { Button } from "@/components/button";
 import { sampleApplications, sampleHires, sampleLearnerBookings, sampleReviews, sampleTeacherBookings, type SampleBooking } from "@/lib/teacher-samples";
+import adaezePhoto from "@/assets/sample-teacher-adaeze.jpg";
 
 export type SampleRole = "teacher" | "learner" | "school" | "admin";
 const money = (kobo: number) => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(kobo / 100);
@@ -49,7 +50,7 @@ function TeacherDash() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-4 rounded-lg bg-brand p-6 text-brand-foreground">
-        <div className="grid size-16 place-items-center rounded-full bg-highlight font-display text-2xl text-highlight-foreground">A</div>
+        <img src={adaezePhoto} alt="Fictional sample portrait of Adaeze O." width={768} height={960} loading="lazy" className="size-16 rounded-full border-2 border-brand-foreground/30 object-cover" />
         <div className="flex-1"><p className="text-xs font-extrabold uppercase opacity-75">Teacher dashboard</p><h2 className="font-display text-3xl font-semibold">Adaeze O. (Sample)</h2><p className="text-sm opacity-80">Profile live · 4.9 ★ from 38 reviews</p></div>
         <Button variant="secondary">Edit profile</Button>
       </div>
