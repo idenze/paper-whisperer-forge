@@ -94,9 +94,9 @@ export const allLessons: readonly Lesson[] = units.flatMap((u) => u.lessons);
 export const findLesson = (id: string | null) => allLessons.find((l) => l.id === id) ?? null;
 
 /** Progress rule: lessons unlock in order; the first incomplete lesson is current. */
-export function lessonStatus(id: string, completed: readonly string[]): "done" | "current" | "open" | "locked" {
+export function lessonStatus(id: string, completed: readonly string[], lessons: readonly Lesson[] = allLessons): "done" | "current" | "open" | "locked" {
   if (completed.includes(id)) return "done";
-  const firstOpen = allLessons.find((l) => !completed.includes(l.id));
+  const firstOpen = lessons.find((l) => !completed.includes(l.id));
   if (firstOpen?.id === id) return "current";
   return "locked";
 }
