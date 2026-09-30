@@ -3,6 +3,8 @@ import { BookOpen, Bot, Clock, FileText, Mic, MicOff, MessageSquare, MonitorUp, 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/product-ui";
 import { LocalPreviewVideoService, type VideoService } from "@/lib/video-service";
+import { previewIdentity } from "@/lib/platform-preview";
+import { useAuth } from "@/lib/use-auth";
 import type { Lesson } from "@/lib/contracts";
 
 type Panel = "chat" | "materials" | "whiteboard" | "notes" | "assistant" | "info";
@@ -40,6 +42,10 @@ export function Classroom({ lesson, role, onLeave }: { lesson: Lesson; role: "st
   const toggleCam = () => { cam ? service.current.disableCamera() : service.current.enableCamera(); setCam(!cam); };
   const time = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
   const other = role === "student" ? lesson.teacherName : lesson.studentName;
+  const otherPhoto = role === "student" ? lesson.teacherPhotoUrl : lesson.studentPhotoUrl;
+  // "You": the real signed-in learner's profile image when available, otherwise the preview identity.
+  const selfPhoto = role === "student" ? user?.user_metadata?.avatar_url : previewIdentity.teacher.photoUrl;
+  const selfName = role === "student" ? (user?.user_metadata?.full_name as string | undefined) ?? previewIdentity.student.name : previewIdentity.teacher.name;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-foreground text-background">
