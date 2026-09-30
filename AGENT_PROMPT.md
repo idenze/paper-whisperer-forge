@@ -35,3 +35,14 @@ You are taking over the Ozituma Igbo learning app. The full source is in the Git
 9. Offline/PWA, and the remaining items in roadmap.md and HANDOFF.md.
 
 Work in small commits. After each feature, test it signed in as a real user and update roadmap.md.
+
+## Lessons platform surface (/platform) — handoff
+The UI is built; wire these. Contracts: src/lib/contracts.ts. Preview data: src/lib/platform-preview.ts (delete once real data flows).
+- Availability + bookable Slots (server prevents double booking), availability exceptions, reschedule, recurring.
+- Booking → Paystack payment → server verification → Lesson.canJoin.
+- Conversations/Messages (text first; attachments later), Notifications.
+- VideoService (src/lib/video-service.ts): implement a managed-provider adapter replacing LocalPreviewVideoService; classroom only calls the interface.
+- Lesson notes, Assignments/submissions, ProgressSummary, StudentRecord.
+- WalletSummary, withdrawals, commission, refunds.
+- Admin rows + approve/suspend actions with audit log; role check server-side.
+Disabled buttons ("connects soon") mark each handoff point.

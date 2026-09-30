@@ -53,6 +53,9 @@ export function TeachersView() {
 
   return (
     <div className="rise-in">
+      <Link to="/platform" className="flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-muted px-4 py-3 text-sm font-semibold text-primary">
+        <span>Open Lessons: dashboards, booking, messages, classroom, homework and admin (preview)</span><span aria-hidden>→</span>
+      </Link>
       <section className="teacher-market-head overflow-hidden rounded-lg border border-border bg-card p-5 shadow-sm sm:p-7">
         <div className="grid items-end gap-5 md:grid-cols-[minmax(0,1fr)_auto]">
           <div>
