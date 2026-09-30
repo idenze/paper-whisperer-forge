@@ -15,9 +15,10 @@ export interface Lesson {
   id: string; teacherName: string; studentName: string; topic: string;
   startsAt: string; minutes: number; status: LessonStatus; payment: PaymentStatus;
   priceLabel: string; canJoin: boolean; // canJoin is decided server-side
+  teacherPhotoUrl?: string; studentPhotoUrl?: string; // profile images come from the backend
 }
 
-export interface Conversation { id: string; name: string; lastMessage: string; unread: number; updatedAt: string }
+export interface Conversation { id: string; name: string; photoUrl?: string; lastMessage: string; unread: number; updatedAt: string }
 export interface Message { id: string; fromMe: boolean; body: string; at: string; state: "sending" | "sent" | "failed" }
 
 export interface Assignment {
@@ -31,7 +32,7 @@ export interface ProgressSummary {
 }
 
 export interface StudentRecord {
-  id: string; name: string; level: string; goal: string; lessonsCompleted: number;
+  id: string; name: string; photoUrl?: string; level: string; goal: string; lessonsCompleted: number;
   lastLesson: string; nextLesson: string | null; progress: number; openAssignments: number; note: string;
 }
 
