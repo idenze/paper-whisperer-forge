@@ -1,60 +1,54 @@
 import { Check, RotateCcw, Volume2, X } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/button";
+import type { PracticeRound } from "@/lib/practice-data";
 
 type PracticeGameProps = {
+  rounds: readonly PracticeRound[];
+  /** "lesson" is the guided path activity, "free" is a repeatable practise session. */
+  mode: "lesson" | "free";
+  heading?: string;
   onClose: () => void;
   onComplete: () => void;
 };
 
-const rounds = [
-  {
-    prompt: "Which scene matches what you hear?",
-    options: [
-      { icon: "👋", label: "PLACEHOLDER greeting" },
-      { icon: "🏃", label: "PLACEHOLDER movement" },
-      { icon: "🍲", label: "PLACEHOLDER meal" },
-      { icon: "🏠", label: "PLACEHOLDER home" },
-    ],
-    correct: 0,
-  },
-  {
-    prompt: "Choose the response that belongs next.",
-    options: [
-      { icon: "☀️", label: "PLACEHOLDER response A" },
-      { icon: "🤝", label: "PLACEHOLDER response B" },
-      { icon: "🌙", label: "PLACEHOLDER response C" },
-      { icon: "🧭", label: "PLACEHOLDER response D" },
-    ],
-    correct: 1,
-  },
-  {
-    prompt: "Find the sound used in this exchange.",
-    options: [
-      { icon: "🥁", label: "PLACEHOLDER sound A" },
-      { icon: "🗣️", label: "PLACEHOLDER sound B" },
-      { icon: "🎶", label: "PLACEHOLDER sound C" },
-      { icon: "👂", label: "PLACEHOLDER sound D" },
-    ],
-    correct: 3,
-  },
-] as const;
-
-export function PracticeGame({ onClose, onComplete }: PracticeGameProps) {
+export function PracticeGame({ rounds, mode, heading, onClose, onComplete }: PracticeGameProps) {
   const [round, setRound] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
   const [audioPlayed, setAudioPlayed] = useState(false);
   const [finished, setFinished] = useState(false);
-  const current = rounds[round] ?? rounds[0];
+  const [spin, setSpin] = useState(0);
+  const isFree = mode === "free";
+
+  // Free practise reshuffles tile order each run so repeats are not memorised by position.
+  const views = useMemo(
+    () =>
+      rounds.map((current, index) => {
+        const total = current.options.length;
+        const shift = isFree ? (spin + index) % total : 0;
+        return {
+          prompt: current.prompt,
+          hint: current.hint,
+          options: current.options.slice(shift).concat(current.options.slice(0, shift)),
+          correct: isFree ? (current.correct - shift + total) % total : current.correct,
+        };
+      }),
+    [rounds, spin, isFree],
+  );
+
+  const current = views[round] ?? views[0];
+  if (!current) return null;
   const isCorrect = selected === current.correct;
+  const total = views.length;
+  const position = Math.min(round + 1, total);
 
   const advance = () => {
     if (!checked) {
       setChecked(true);
       return;
     }
-    if (round === rounds.length - 1) {
+    if (round === total - 1) {
       setFinished(true);
       onComplete();
       return;
@@ -71,16 +65,17 @@ export function PracticeGame({ onClose, onComplete }: PracticeGameProps) {
     setChecked(false);
     setAudioPlayed(false);
     setFinished(false);
+    setSpin((value) => value + 1);
   };
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-end bg-foreground/45 sm:place-items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="practice-title">
       <section className="flex max-h-[100dvh] w-full max-w-3xl flex-col overflow-y-auto rounded-t-lg border border-border bg-card shadow-2xl sm:max-h-[92dvh] sm:rounded-lg">
         <header className="flex items-center gap-4 border-b border-border px-4 py-4 sm:px-7">
-          <div className="flex flex-1 gap-1.5" aria-label={`Round ${Math.min(round + 1, rounds.length)} of ${rounds.length}`}>
-            {rounds.map((_, index) => <span key={index} className={`h-2 flex-1 rounded-full transition-colors ${index <= round ? "bg-primary" : "bg-muted"}`} />)}
+          <div className="flex flex-1 gap-1.5" aria-label={`Activity ${position} of ${total}`}>
+            {views.map((_, index) => <span key={index} className={`h-2 flex-1 rounded-full transition-colors ${index <= round ? "bg-primary" : "bg-muted"}`} />)}
           </div>
-          <span className="text-xs font-extrabold text-muted-foreground">{Math.min(round + 1, rounds.length)} / {rounds.length}</span>
+          <span className="text-xs font-extrabold text-muted-foreground">{position} / {total}</span>
           <Button variant="icon" onClick={onClose} aria-label="Close practice"><X className="size-5" /></Button>
         </header>
 
@@ -89,20 +84,27 @@ export function PracticeGame({ onClose, onComplete }: PracticeGameProps) {
             <div>
               <span className="mx-auto grid size-24 place-items-center rounded-full bg-secondary text-primary"><Check className="size-11" strokeWidth={3} /></span>
               <span className="mt-6 inline-flex rounded-sm bg-muted px-2 py-1 text-[10px] font-black uppercase text-muted-foreground">Placeholder content</span>
-              <h2 id="practice-title" className="mt-3 font-display text-4xl font-semibold">Round complete</h2>
-              <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">You explored sound, context, and response across three short activities.</p>
+              <h2 id="practice-title" className="mt-3 font-display text-4xl font-semibold">{isFree ? "Session complete" : "Round complete"}</h2>
+              <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
+                {isFree
+                  ? `${total} short activities done${heading ? ` in ${heading.toLowerCase()}` : ""}. Nothing here moves your path — it just makes the sounds stick.`
+                  : "You explored sound, context, and response across three short activities."}
+              </p>
               <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-                <Button variant="secondary" onClick={restart}><RotateCcw className="size-4" /> Play again</Button>
-                <Button onClick={onClose}>Return to journey <Check className="size-4" /></Button>
+                <Button variant="secondary" onClick={restart}><RotateCcw className="size-4" /> {isFree ? "Practise again" : "Play again"}</Button>
+                <Button onClick={onClose}>{isFree ? "Back to practise" : "Return to journey"} <Check className="size-4" /></Button>
               </div>
             </div>
           </div>
         ) : (
           <>
             <div className="px-5 pb-7 pt-6 text-center sm:px-8">
-              <span className="inline-flex rounded-sm bg-muted px-2 py-1 text-[10px] font-black uppercase text-muted-foreground">Placeholder content</span>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <span className="inline-flex rounded-sm bg-muted px-2 py-1 text-[10px] font-black uppercase text-muted-foreground">Placeholder content</span>
+                {isFree && heading ? <span className="inline-flex rounded-sm bg-secondary px-2 py-1 text-[10px] font-black uppercase text-secondary-foreground">{heading}</span> : null}
+              </div>
               <h2 id="practice-title" className="mx-auto mt-3 max-w-lg font-display text-2xl font-semibold sm:text-3xl">{current.prompt}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Listen first, then choose a scene tile.</p>
+              <p className="mt-2 text-sm text-muted-foreground">{current.hint}</p>
               <div className="relative mx-auto mt-7 grid size-36 place-items-center">
                 <span className={`absolute inset-0 rounded-full bg-secondary ${audioPlayed ? "practice-pulse" : ""}`} />
                 <Button className="relative size-24 min-h-24 rounded-full border-b-[7px] border-brand px-0 shadow-lg active:translate-y-1 active:border-b-2" onClick={() => setAudioPlayed(true)} aria-label="Play placeholder audio">
@@ -120,7 +122,7 @@ export function PracticeGame({ onClose, onComplete }: PracticeGameProps) {
                   const wrongChoice = checked && chosen && !isCorrect;
                   return (
                     <Button
-                      key={option.label}
+                      key={`${option.label}-${index}`}
                       variant="secondary"
                       disabled={checked}
                       onClick={() => setSelected(index)}
@@ -141,7 +143,7 @@ export function PracticeGame({ onClose, onComplete }: PracticeGameProps) {
               )}
 
               <Button className="mt-5 w-full border-b-4 border-brand active:translate-y-0.5 active:border-b-2" disabled={selected === null} onClick={advance}>
-                {checked ? round === rounds.length - 1 ? "Finish round" : "Next challenge" : "Check my choice"}
+                {checked ? round === total - 1 ? "Finish session" : "Next activity" : "Check my choice"}
               </Button>
             </div>
           </>
