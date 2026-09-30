@@ -100,3 +100,25 @@
   .rise-in-delay { animation: rise-in 600ms 120ms ease-out both; }
   .practice-pulse { animation: practice-pulse 1.25s ease-out 2; }
 }
+
+/* ---------- Keyboard skins (SwiftKey-style themes) ---------- */
+.kb { --kb-bg: oklch(0.95 0.01 90); --kb-key: oklch(1 0 0); --kb-text: oklch(0.2 0.02 150); --kb-special: oklch(0.88 0.015 90); --kb-accent: oklch(0.45 0.12 155); --kb-shadow: oklch(0.8 0.01 90); --kb-pattern: none; }
+.kb-midnight { --kb-bg: oklch(0.18 0.02 260); --kb-key: oklch(0.27 0.02 260); --kb-text: oklch(0.96 0 0); --kb-special: oklch(0.22 0.02 260); --kb-accent: oklch(0.72 0.15 220); --kb-shadow: oklch(0.12 0.02 260); }
+.kb-akwete { --kb-bg: oklch(0.36 0.12 28); --kb-key: oklch(0.97 0.03 85); --kb-text: oklch(0.3 0.1 28); --kb-special: oklch(0.8 0.14 80); --kb-accent: oklch(0.8 0.15 80); --kb-shadow: oklch(0.25 0.1 28);
+  --kb-pattern: repeating-linear-gradient(45deg, transparent 0 14px, oklch(0.8 0.14 80 / .25) 14px 16px), repeating-linear-gradient(-45deg, transparent 0 14px, oklch(0.2 0.05 28 / .3) 14px 16px); }
+.kb-uli { --kb-bg: oklch(0.94 0.03 80); --kb-key: oklch(0.98 0.015 80); --kb-text: oklch(0.18 0.01 60); --kb-special: oklch(0.86 0.04 75); --kb-accent: oklch(0.2 0.01 60); --kb-shadow: oklch(0.7 0.04 70);
+  --kb-pattern: radial-gradient(circle at 20% 30%, transparent 0 18px, oklch(0.2 0.01 60 / .12) 18px 19px, transparent 20px), radial-gradient(circle at 80% 70%, transparent 0 26px, oklch(0.2 0.01 60 / .1) 26px 27px, transparent 28px); }
+.kb-forest { --kb-bg: oklch(0.32 0.07 155); --kb-key: oklch(0.42 0.08 155); --kb-text: oklch(0.97 0.02 120); --kb-special: oklch(0.36 0.07 155); --kb-accent: oklch(0.85 0.16 120); --kb-shadow: oklch(0.22 0.05 155); }
+.kb-ocean { --kb-bg: oklch(0.45 0.12 230); --kb-key: oklch(1 0 0 / .18); --kb-text: oklch(1 0 0); --kb-special: oklch(1 0 0 / .1); --kb-accent: oklch(0.9 0.1 190); --kb-shadow: oklch(0.3 0.1 240 / .5);
+  --kb-pattern: linear-gradient(160deg, oklch(0.6 0.13 200), oklch(0.35 0.13 260)); }
+.kb-sunset { --kb-bg: oklch(0.6 0.17 40); --kb-key: oklch(1 0 0 / .22); --kb-text: oklch(1 0 0); --kb-special: oklch(1 0 0 / .12); --kb-accent: oklch(0.95 0.12 95); --kb-shadow: oklch(0.35 0.15 20 / .5);
+  --kb-pattern: linear-gradient(160deg, oklch(0.8 0.15 75), oklch(0.6 0.2 30) 55%, oklch(0.4 0.17 350)); }
+.kb-neon { --kb-bg: oklch(0.12 0 0); --kb-key: oklch(0.16 0 0); --kb-text: oklch(0.9 0.2 145); --kb-special: oklch(0.14 0 0); --kb-accent: oklch(0.75 0.25 330); --kb-shadow: oklch(0.9 0.2 145 / .35); }
+.kb-surface { background-color: var(--kb-bg); background-image: var(--kb-pattern); color: var(--kb-text); }
+.kb-key { background: var(--kb-key); color: var(--kb-text); box-shadow: 0 2px 0 var(--kb-shadow); }
+.kb-key-special { background: var(--kb-special); color: var(--kb-text); box-shadow: 0 2px 0 var(--kb-shadow); }
+.kb-key-accent { background: var(--kb-accent); color: var(--kb-bg); }
+.kb-neon .kb-key { box-shadow: 0 0 0 1px var(--kb-shadow), 0 0 10px var(--kb-shadow); }
+.kb-flat .kb-key, .kb-flat .kb-key-special { box-shadow: none; background: transparent; }
+@keyframes kb-pop { from { transform: translate(-50%, 4px) scale(.8); opacity: 0 } to { transform: translate(-50%, 0) scale(1); opacity: 1 } }
+.kb-popup { animation: kb-pop .08s ease-out; }
