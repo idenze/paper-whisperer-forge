@@ -10,17 +10,21 @@ export function useStickyState<T>(key: string | null, initial: T) {
 
   useEffect(() => {
     loaded.current = false;
+    let raw: string | null = null;
     if (key) {
-      try {
-        const raw = window.localStorage.getItem(`ozituma:${key}`);
-        if (raw !== null) setValue(JSON.parse(raw) as T);
-      } catch { /* ignore bad saved data */ }
+      try { raw = window.localStorage.getItem(`ozituma:${key}`); } catch { /* blocked */ }
     }
-    loaded.current = true;
+    if (raw !== null) {
+      try { setValue(JSON.parse(raw) as T); } catch { loaded.current = true; }
+      // Saving resumes after the loaded value has been applied (next render).
+    } else {
+      loaded.current = true;
+    }
   }, [key]);
 
   useEffect(() => {
-    if (!key || !loaded.current) return;
+    if (!key) return;
+    if (!loaded.current) { loaded.current = true; return; }
     try { window.localStorage.setItem(`ozituma:${key}`, JSON.stringify(value)); } catch { /* storage full or blocked */ }
   }, [key, value]);
 
