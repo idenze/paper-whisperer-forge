@@ -42,7 +42,7 @@ function PlatformPage() {
   const [section, setSection] = useState("dashboard");
   const [classroom, setClassroom] = useState<Lesson | null>(null);
   const nav = navByRole[role];
-  const pick = (r: Role) => { setRole(r); setSection(navByRole[r][0].id); };
+  const pick = (r: Role) => { setRole(r); setSection(navByRole[r][0]!.id); };
   const join = (l: Lesson) => setClassroom(l);
 
   return (
@@ -134,7 +134,7 @@ function StudentDashboard({ onJoin, go }: { onJoin: (l: Lesson) => void; go: (s:
       <Card title="Coming up" eyebrow="Lessons" action={<button className="text-sm text-primary" onClick={() => go("book")}>Book another</button>}>
         <ul>{previewLessons.filter((l) => l.status !== "completed").slice(0, 2).map((l) => <LessonRow key={l.id} l={l} role="student" onJoin={onJoin} />)}</ul>
       </Card>
-      <Card title="Messages" eyebrow="Inbox"><p className="text-sm">{previewConversations[0].name}: “{previewConversations[0].lastMessage}”</p><button className="mt-2 text-sm text-primary" onClick={() => go("messages")}>Open messages →</button></Card>
+      <Card title="Messages" eyebrow="Inbox"><p className="text-sm">{previewConversations[0]!.name}: “{previewConversations[0]!.lastMessage}”</p><button className="mt-2 text-sm text-primary" onClick={() => go("messages")}>Open messages →</button></Card>
     </div>
   );
 }
@@ -170,7 +170,7 @@ function BookingFlow() {
   return (
     <div className="mx-auto max-w-2xl">
       <ol className="mb-6 flex flex-wrap gap-2 text-xs">{steps.map((s, i) => <li key={s} className={`rounded-full px-3 py-1 ${i === step ? "bg-primary text-primary-foreground" : i < step ? "bg-muted" : "border border-border text-muted-foreground"}`}>{i + 1}. {s}</li>)}</ol>
-      <Card title={steps[step]} eyebrow="Adaeze O. · Enugu dialect">
+      <Card title={steps[step]!} eyebrow="Adaeze O. · Enugu dialect">
         {step === 0 && <Choice options={["Trial lesson", "Regular lesson", "Weekly recurring"]} value={type} onChange={setType} />}
         {step === 1 && <Choice options={["30", "60", "90"]} value={String(minutes)} onChange={(v) => setMinutes(Number(v))} suffix=" min" />}
         {step === 2 && (
@@ -265,7 +265,7 @@ function Messages() {
   const convo = previewConversations.find((c) => c.id === active);
   const send = () => {
     if (!active || !draft.trim()) return;
-    setThreads({ ...threads, [active]: [...threads[active], { id: String(Date.now()), fromMe: true, body: draft, at: "now", state: "sending" }] });
+    setThreads({ ...threads, [active]: [...(threads[active] ?? []), { id: String(Date.now()), fromMe: true, body: draft, at: "now", state: "sending" }] });
     setDraft("");
   };
   return (
@@ -281,7 +281,7 @@ function Messages() {
       {convo ? (
         <div className="flex flex-col">
           <div className="flex items-center gap-2 border-b border-border p-4"><button className="md:hidden" aria-label="Back" onClick={() => setActive(null)}><ArrowLeft className="size-4" /></button><b>{convo.name}</b></div>
-          <div className="flex-1 space-y-2 overflow-auto p-4">{threads[convo.id].map((m) => (
+          <div className="flex-1 space-y-2 overflow-auto p-4">{(threads[convo.id] ?? []).map((m) => (
             <div key={m.id} className={`max-w-[75%] rounded-lg px-3 py-2 text-sm ${m.fromMe ? "ml-auto bg-primary text-primary-foreground" : "bg-muted"}`}>{m.body}<span className="mt-1 block text-[10px] opacity-70">{m.at}{m.fromMe && ` · ${m.state === "sending" ? "Not sent — preview" : "Sent"}`}</span></div>
           ))}</div>
           <form className="flex gap-2 border-t border-border p-3" onSubmit={(e) => { e.preventDefault(); send(); }}>
