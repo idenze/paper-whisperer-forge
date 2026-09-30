@@ -12,3 +12,5 @@
 - [x] Give the lesson ("Continue learning / Greetings") its own format, distinct from Practise
 - [x] All lessons in the path playable (7 placeholder lessons, unlock in order, replay, next lesson, culture note)
 - [x] HANDOFF.md with gaps, rules and agent prompt
+- [ ] Accounts (email + Google), profile & settings, in-app dictionary, staff review area, course tables
+- [ ] Keyboard page (Igbo, Ndebe, English) using data from github.com/chrisemezue/edemede.github.io; demo + handoff for PC/mobile keyboards
