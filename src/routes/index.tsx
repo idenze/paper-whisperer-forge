@@ -8,6 +8,7 @@ import {
   Home,
   Keyboard,
   ShieldCheck,
+  GraduationCap,
   LockKeyhole,
   MessageCircle,
   Search,
@@ -35,6 +36,7 @@ import { DictionaryView } from "@/components/dictionary-view";
 import { ProfileView } from "@/components/profile-view";
 import { StaffView } from "@/components/staff-view";
 import { KeyboardView } from "@/components/keyboard-view";
+import { TeachersView } from "@/components/teachers-view";
 import { applySettings, defaultSettings, type LearnerSettings } from "@/lib/settings";
 
 export const Route = createFileRoute("/")({
@@ -51,7 +53,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Tab = "Home" | "Learn" | "Practise" | "Tutor" | "Ndebe" | "Keyboard" | "Dictionary" | "Profile" | "Staff";
+type Tab = "Home" | "Learn" | "Practise" | "Tutor" | "Ndebe" | "Keyboard" | "Teachers" | "Dictionary" | "Profile" | "Staff";
 
 const navItems = [
   { label: "Home", icon: Home },
@@ -59,6 +61,7 @@ const navItems = [
   { label: "Practise", icon: Sparkles },
   { label: "Tutor", icon: MessageCircle },
   { label: "Ndebe", icon: SquarePen },
+  { label: "Teachers", icon: GraduationCap },
   { label: "Keyboard", icon: Keyboard },
   { label: "Dictionary", icon: Search },
 ] as const;
@@ -157,6 +160,8 @@ function Index() {
           <NdebeStudio />
         ) : activeTab === "Keyboard" ? (
           <KeyboardView />
+        ) : activeTab === "Teachers" ? (
+          <TeachersView />
         ) : activeTab === "Dictionary" ? (
           <DictionaryView />
         ) : activeTab === "Profile" ? (
@@ -239,7 +244,7 @@ function Index() {
         )}
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-7 border-t border-border bg-card px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-lg lg:hidden" aria-label="Mobile navigation">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-8 border-t border-border bg-card px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-lg lg:hidden" aria-label="Mobile navigation">
         {navItems.map(({ label, icon: Icon, ...item }) =>
           (
             <button key={label} onClick={() => goTab(label as Tab)} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-bold ${activeTab === label ? "text-primary" : "text-muted-foreground"}`}><Icon className="size-5" />{label}</button>
