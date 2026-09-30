@@ -360,10 +360,10 @@ function Notifications() {
 
 function AdminConsole() {
   const tabs = Object.keys(previewAdmin);
-  const [tab, setTab] = useState(tabs[0]);
+  const [tab, setTab] = useState<string>(tabs[0] ?? "Users");
   const [q, setQ] = useState("");
   const [detail, setDetail] = useState<string | null>(null);
-  const rows = previewAdmin[tab].filter((r) => (r.primary + r.secondary).toLowerCase().includes(q.toLowerCase()));
+  const rows = (previewAdmin[tab] ?? []).filter((r) => (r.primary + r.secondary).toLowerCase().includes(q.toLowerCase()));
   const d = rows.find((r) => r.id === detail);
   return (
     <div className="grid gap-4">
