@@ -98,8 +98,7 @@ function LessonRow({ l, role, onJoin }: { l: Lesson; role: Role; onJoin: (l: Les
       {otherPhoto
         ? <img src={otherPhoto} alt={`Sample photo of ${otherName}`} width={80} height={80} loading="lazy" className="size-10 rounded-full object-cover" />
         : <span className="grid size-10 place-items-center rounded-full bg-muted font-semibold">{otherName[0]}</span>}
-      <div className="min-w-0 flex-1">
-        <p className="font-semibold">{l.topic}</p>
+      <div className="min-w-[10rem] flex-1">
         <p className="text-sm text-muted-foreground">{fmt(l.startsAt)} · {l.minutes} min · {role === "teacher" ? l.studentName : l.teacherName}</p>
       </div>
       <StatusBadge tone={statusTone(l.status)}>{l.status}</StatusBadge>
