@@ -18,3 +18,4 @@
 - Keep free Practise sessions separate from lesson activities: practise is repeatable, learner-chosen, and never advances the course path.
 - Course units and lessons live in src/lib/lesson-data.ts and render through LessonFlow (cards → chat → match → culture note); lessons unlock in order — one data source for the whole path.
 - Learner place is saved per device via useStickyState (localStorage, `ozituma:` prefix) until accounts sync progress server-side.
+- Teacher discovery is media-first: profiles support portrait and introduction-video URLs, while fictional preview media stays explicitly labelled as sample content.

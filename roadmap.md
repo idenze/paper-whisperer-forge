@@ -28,3 +28,4 @@
 - [x] Teachers marketplace: apply → admin approve → public profiles, book lessons, school hiring requests, reviews after completed lessons
 - [ ] Paystack checkout + webhook to set lesson_bookings.paid (needs Paystack secret key) — next agent
 - [ ] Video lesson room (e.g. Daily/Jitsi link per booking), teacher payouts via Paystack subaccounts/transfers — next agent
+- [x] Media-rich teacher discovery and profile preview with fictional portraits, sample introduction video, availability, lesson counts, and stronger booking actions
