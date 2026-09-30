@@ -92,7 +92,7 @@ export function TeachersView() {
   );
 }
 
-function Stars({ rating }: { rating?: Rating }) {
+function Stars({ rating }: { rating?: Rating | undefined }) {
   if (!rating?.review_count) return <span className="text-xs font-bold text-muted-foreground">New teacher</span>;
   return <span className="flex items-center gap-1 text-sm font-extrabold"><Star className="size-4 text-highlight" fill="currentColor" />{rating.avg_rating} <span className="font-normal text-muted-foreground">({rating.review_count})</span></span>;
 }
@@ -102,7 +102,7 @@ function Avatar({ t, size = "size-14" }: { t: Teacher; size?: string }) {
     : <div className={`${size} grid place-items-center rounded-full bg-secondary font-display text-xl font-semibold text-secondary-foreground`}>{t.display_name.slice(0, 1)}</div>;
 }
 
-function TeacherCard({ t, rating, onOpen }: { t: Teacher; rating?: Rating; onOpen: () => void }) {
+function TeacherCard({ t, rating, onOpen }: { t: Teacher; rating?: Rating | undefined; onOpen: () => void }) {
   return (
     <button onClick={onOpen} className="group flex flex-col rounded-lg border border-border bg-card p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md">
       <div className="flex items-center gap-3"><Avatar t={t} /><div className="min-w-0"><p className="flex items-center gap-1 font-display text-lg font-semibold">{t.display_name}<BadgeCheck className="size-4 text-primary" /></p><Stars rating={rating} /></div></div>
@@ -113,7 +113,7 @@ function TeacherCard({ t, rating, onOpen }: { t: Teacher; rating?: Rating; onOpe
   );
 }
 
-function TeacherProfile({ t, rating, onBack }: { t: Teacher; rating?: Rating; onBack: () => void }) {
+function TeacherProfile({ t, rating, onBack }: { t: Teacher; rating?: Rating | undefined; onBack: () => void }) {
   const auth = useAuth();
   const [reviews, setReviews] = useState<Tables<"teacher_reviews">[]>([]);
   const [mode, setMode] = useState<"book" | "hire">("book");
@@ -189,7 +189,7 @@ function Info({ title, body }: { title: string; body: string }) {
   return <div className="rounded-lg border border-border bg-card p-4"><p className="text-xs font-extrabold uppercase text-muted-foreground">{title}</p><p className="mt-1 font-bold">{body}</p></div>;
 }
 
-function TeachForm({ existing, onDone, onBack }: { existing?: Teacher; onDone: () => void; onBack: () => void }) {
+function TeachForm({ existing, onDone, onBack }: { existing?: Teacher | undefined; onDone: () => void; onBack: () => void }) {
   const auth = useAuth();
   const [err, setErr] = useState("");
   const list = (v: FormDataEntryValue | null) => String(v ?? "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -232,7 +232,7 @@ function TeachForm({ existing, onDone, onBack }: { existing?: Teacher; onDone: (
   );
 }
 
-function MyLessons({ teacher, onBack, onEdit }: { teacher?: Teacher; onBack: () => void; onEdit: () => void }) {
+function MyLessons({ teacher, onBack, onEdit }: { teacher?: Teacher | undefined; onBack: () => void; onEdit: () => void }) {
   const auth = useAuth();
   const [bookings, setBookings] = useState<Tables<"lesson_bookings">[]>([]);
   const [hires, setHires] = useState<Tables<"school_hire_requests">[]>([]);
