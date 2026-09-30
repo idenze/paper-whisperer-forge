@@ -97,11 +97,11 @@ function TypeWorkspace() {
           <div>
             <p className="mb-2 text-xs font-extrabold uppercase text-muted-foreground">2. Vowel and tone</p>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] border-separate border-spacing-1 text-xs">
+              <table className="w-full min-w-[560px] table-fixed border-separate border-spacing-1 text-xs">
                 <thead><tr><th />{ndebeVowels.map((v) => <th key={v} className="font-black">{v}</th>)}</tr></thead>
                 <tbody>{ndebeTones.map((tone, ti) => (
                   <tr key={tone}><th className="pr-2 text-left font-black text-muted-foreground">{tone}</th>{ndebeVowels.map((v) => (
-                    <td key={v}><button type="button" onClick={() => addVowel(v, tone)} aria-label={`${v} ${tone}`} className={`h-10 w-full rounded-sm border border-border font-black hover:border-primary ${ti === 0 ? "bg-highlight/25" : ti === 1 ? "bg-accent/20" : "bg-muted"}`}>{v}</button></td>
+                    <td key={v}><button type="button" onClick={() => addVowel(v, tone)} aria-label={`${v} ${tone}`} className={`h-10 w-full rounded-sm border border-border font-black hover:border-primary ${ti === 0 ? "bg-highlight/25" : ti === 1 ? "bg-secondary" : "bg-muted"}`}>{v}</button></td>
                   ))}</tr>
                 ))}</tbody>
               </table>
@@ -125,7 +125,7 @@ function TypeWorkspace() {
       </div>
 
       <aside className="space-y-4">
-        <section className="rounded-md border border-border bg-secondary p-5"><p className="text-xs font-extrabold uppercase text-muted-foreground">Key colours</p><ul className="mt-3 space-y-2 text-sm font-bold"><li className="flex items-center gap-2"><span className="size-3 rounded-sm bg-highlight/60" /> Vowel · high</li><li className="flex items-center gap-2"><span className="size-3 rounded-sm bg-accent/50" /> Vowel · mid</li><li className="flex items-center gap-2"><span className="size-3 rounded-sm bg-muted-foreground/40" /> Vowel · low</li><li className="flex items-center gap-2"><span className="size-3 rounded-sm bg-primary" /> Stem</li></ul></section>
+        <section className="rounded-md border border-border bg-secondary p-5"><p className="text-xs font-extrabold uppercase text-muted-foreground">Key colours</p><ul className="mt-3 space-y-2 text-sm font-bold"><li className="flex items-center gap-2"><span className="size-3 rounded-sm bg-highlight/60" /> Vowel · high</li><li className="flex items-center gap-2"><span className="size-3 rounded-sm bg-secondary border border-border" /> Vowel · mid</li><li className="flex items-center gap-2"><span className="size-3 rounded-sm bg-muted-foreground/40" /> Vowel · low</li><li className="flex items-center gap-2"><span className="size-3 rounded-sm bg-primary" /> Stem</li></ul></section>
         <section className="rounded-md border border-border bg-card p-5"><h3 className="font-display text-lg font-semibold">Real characters</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">When the verified key-to-glyph mapping is supplied, this same keyboard will output real Ndebe characters in your chosen font.</p><a className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-primary" href="https://typendebe.com/" target="_blank" rel="noopener noreferrer">Open Type Ńdẹ́bẹ́ <ExternalLink className="size-3.5" /></a></section>
       </aside>
     </div>
