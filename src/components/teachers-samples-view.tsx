@@ -22,7 +22,7 @@ export function SampleDashboards({ role, setRole, onBack }: { role: SampleRole; 
       <Button variant="ghost" onClick={onBack}><ArrowLeft className="size-4" /> All teachers</Button>
       <SampleBanner />
       <div className="flex flex-wrap gap-2" role="tablist">
-        {tabs.map(({ id, label, icon: Icon }) => <Button key={id} variant={role === id ? "default" : "secondary"} onClick={() => setRole(id)} aria-selected={role === id} role="tab"><Icon className="size-4" />{label}</Button>)}
+        {tabs.map(({ id, label, icon: Icon }) => <Button key={id} variant={role === id ? "primary" : "secondary"} onClick={() => setRole(id)} aria-selected={role === id} role="tab"><Icon className="size-4" />{label}</Button>)}
       </div>
       {role === "teacher" ? <TeacherDash /> : role === "learner" ? <LearnerPage /> : role === "school" ? <SchoolPage /> : <AdminPage />}
     </div>
