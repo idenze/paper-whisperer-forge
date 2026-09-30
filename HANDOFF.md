@@ -99,3 +99,9 @@ Start by listing, in your own words, what is built, what is missing (from HANDOF
 "What is NOT done yet"), and your plan for the first work order. Wait for my approval,
 then build one work order at a time, and update roadmap.md after each.
 ```
+
+## Keyboard
+Page: Keyboard tab. Layout data: src/lib/keyboard-data.ts (single source for future Windows/Mac/Android/iOS keyboards). Igbo shortcuts and public/keyboards/ig-vocab.txt come from Edémédé (Apache-2.0, credit Chris C. & Handel C. Emezue; README asks not to reproduce code, so it was reimplemented — confirm permission before shipping the word list). Suggestions are labelled "not reviewed by Ozituma".
+
+## Staff access
+Make the first admin by inserting a row into user_roles (role 'admin') for your account; admins then grant 'linguist'/'editor'.

@@ -12,3 +12,15 @@
 - [x] Give the lesson ("Continue learning / Greetings") its own format, distinct from Practise
 - [x] All lessons in the path playable (7 placeholder lessons, unlock in order, replay, next lesson, culture note)
 - [x] HANDOFF.md with gaps, rules and agent prompt
+- [ ] Accounts (email + Google), profile & settings, in-app dictionary, staff review area, course tables
+- [ ] Keyboard page (Igbo, Ndebe, English) using data from github.com/chrisemezue/edemede.github.io; demo + handoff for PC/mobile keyboards
+
+## Done this round
+- [x] Accounts (email + Google), password reset, progress saved to account when signed in
+- [x] In-app Dictionary (published words), Profile & Settings, Staff area (review/publish, CSV import, audit log)
+- [x] Course path reads published course from the database, demo course until one is published
+- [x] Keyboard page (Igbo / English / Ńdẹ́bẹ́ prototype) — layouts in src/lib/keyboard-data.ts, Edémédé word list in public/keyboards (Apache-2.0, unreviewed, off by default)
+
+## For the next agent
+- [ ] Installable desktop/mobile keyboards generated from keyboard-data.ts
+- [ ] Real Ńdẹ́bẹ́ font + glyph mapping; full course content; recordings; first admin role assignment
