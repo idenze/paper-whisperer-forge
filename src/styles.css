@@ -55,6 +55,7 @@
   --warm: oklch(0.89 0.09 86);
   --ink: oklch(0.27 0.038 202);
   --teacher-pattern: oklch(0.45 0.115 152 / 0.08);
+  --shadow-focus: 0 18px 40px -24px oklch(0.2 0.04 155 / 0.5);
 }
 
 .dark {
@@ -73,6 +74,7 @@
   --ink: oklch(0.15 0.03 202);
   --highlight-foreground: oklch(0.9 0.08 50);
   --teacher-pattern: oklch(0.68 0.13 152 / 0.1);
+  --shadow-focus: 0 18px 40px -24px oklch(0.05 0.02 180 / 0.8);
 }
 
 .reduce-motion *, .reduce-motion *::before, .reduce-motion *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
@@ -86,6 +88,7 @@
 }
 
 @utility font-display { font-family: var(--font-display); }
+@utility shadow-focus { box-shadow: var(--shadow-focus); }
 
 .teacher-market-head {
   background-image:
