@@ -44,7 +44,7 @@ export function PracticeGame({ rounds, mode, heading, onClose, onComplete }: Pra
   const inputRef = useRef<HTMLInputElement>(null);
   const isFree = mode === "free";
 
-  useEffect(() => { rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }, []);
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); return () => { window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior }); }; }, []);
 
   const views = useMemo(
     () => rounds.map((r, index) => {
