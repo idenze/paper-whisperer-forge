@@ -82,6 +82,8 @@ function Index() {
   const saveCompletion = (key: string) => {
     if (auth.user) supabase.from("lesson_progress").upsert({ user_id: auth.user.id, lesson_key: key, completed_at: new Date().toISOString() }).then(() => {});
   };
+  // Switching pages leaves the open lesson; its place is still saved and resumes on return.
+  const goTab = (t: Tab) => { setOpenLessonId(null); setActiveTab(t); };
   const openLesson = allLessons.find((l) => l.id === openLessonId) ?? null;
   const lessonOpen = openLesson !== null;
   const currentLesson = allLessons.find((l) => !lessonsDone.includes(l.id)) ?? allLessons[0];
@@ -100,7 +102,7 @@ function Index() {
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
             {navItems.map(({ label, icon: Icon }) =>
               false ? null : (
-                <Button key={label} variant="ghost" onClick={() => setActiveTab(label as Tab)} aria-current={activeTab === label ? "page" : undefined} className={activeTab === label ? "bg-secondary text-secondary-foreground" : ""}>
+                <Button key={label} variant="ghost" onClick={() => goTab(label as Tab)} aria-current={activeTab === label ? "page" : undefined} className={activeTab === label ? "bg-secondary text-secondary-foreground" : ""}>
                   <Icon className="size-4" /> {label}
                 </Button>
               ),
@@ -112,12 +114,12 @@ function Index() {
               <span className="text-sm font-extrabold">{learner.streak}</span>
               <span className="text-xs text-muted-foreground">day streak</span>
             </div>
-            {auth.isStaff && <Button variant="ghost" onClick={() => setActiveTab("Staff")} className={activeTab === "Staff" ? "bg-secondary" : ""}><ShieldCheck className="size-4" /><span className="hidden sm:inline">Staff</span></Button>}
+            {auth.isStaff && <Button variant="ghost" onClick={() => goTab("Staff")} className={activeTab === "Staff" ? "bg-secondary" : ""}><ShieldCheck className="size-4" /><span className="hidden sm:inline">Staff</span></Button>}
             {auth.user ? (
-              <button onClick={() => setActiveTab("Profile")} className="grid size-10 place-items-center rounded-full bg-ink text-sm font-black uppercase text-primary-foreground" aria-label="Profile and settings">{(auth.user.email ?? "?").slice(0, 2)}</button>
+              <button onClick={() => goTab("Profile")} className="grid size-10 place-items-center rounded-full bg-ink text-sm font-black uppercase text-primary-foreground" aria-label="Profile and settings">{(auth.user.email ?? "?").slice(0, 2)}</button>
             ) : (
               <div className="flex items-center gap-1">
-                <Button variant="icon" onClick={() => setActiveTab("Profile")} aria-label="Settings"><UserRound className="size-5" /></Button>
+                <Button variant="icon" onClick={() => goTab("Profile")} aria-label="Settings"><UserRound className="size-5" /></Button>
                 <Button asChild><Link to="/auth">Sign in</Link></Button>
               </div>
             )}
@@ -240,7 +242,7 @@ function Index() {
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-7 border-t border-border bg-card px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-lg lg:hidden" aria-label="Mobile navigation">
         {navItems.map(({ label, icon: Icon, ...item }) =>
           (
-            <button key={label} onClick={() => setActiveTab(label as Tab)} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-bold ${activeTab === label ? "text-primary" : "text-muted-foreground"}`}><Icon className="size-5" />{label}</button>
+            <button key={label} onClick={() => goTab(label as Tab)} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-md text-[10px] font-bold ${activeTab === label ? "text-primary" : "text-muted-foreground"}`}><Icon className="size-5" />{label}</button>
           )
         )}
       </nav>
