@@ -112,7 +112,7 @@ export function PracticeView() {
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">{detail}</p>
                     <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground"><Clock3 className="size-3.5" /> {rounds.length} rounds · about {minutes} min</p>
                   </div>
-                  <Button variant={index === 0 ? "default" : "secondary"} className="mt-5 min-h-11 w-full sm:w-auto" onClick={() => start(name)}>
+                  <Button variant={index === 0 ? "primary" : "secondary"} className="mt-5 min-h-11 w-full sm:w-auto" onClick={() => start(name)}>
                     <Play className="size-4" /> {played ? "Play again" : "Start"}
                   </Button>
                 </article>
