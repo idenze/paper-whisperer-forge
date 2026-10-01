@@ -31,6 +31,7 @@
 - [x] Media-rich teacher discovery and profile preview with fictional portraits, sample introduction video, availability, lesson counts, and stronger booking actions
 
 ## Coherent platform frontend
+- [x] Give every learner destination a real reloadable URL and rebuild Practise as a responsive game-first experience
 - [x] Phase 1–2: audit the existing product and begin consolidating reusable design-system patterns without replacing working learning flows
 - [ ] Phase 3: redesign the student and teacher dashboards around next actions, real backend state, and responsive layouts (student dashboard foundation complete)
 - [ ] Phase 4: refine teacher discovery and profiles; keep sample media explicitly labelled until approved profiles exist

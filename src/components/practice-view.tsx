@@ -1,72 +1,120 @@
-import { ArrowRight, Check, Clock, Flame, Layers, Shuffle } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  Clock3,
+  Flame,
+  Gauge,
+  Headphones,
+  Play,
+  Shuffle,
+  Sparkles,
+  Trophy,
+} from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/button";
 import { PracticeGame } from "@/components/practice-game";
 import { mixedRounds, practiceFocuses, type PracticeRound } from "@/lib/practice-data";
-import { learner } from "@/lib/learning-data";
 import { useStickyState } from "@/lib/use-sticky-state";
 
 type Session = { title: string; rounds: readonly PracticeRound[] };
 
 export function PracticeView() {
-  const [sessionTitle, setSessionTitle] = useStickyState<string | null>("practise:session", null);
+  const [lastSession, setLastSession] = useStickyState<string | null>("practise:last", null);
+  const [running, setRunning] = useState<string | null>(null);
   const [history, setHistory] = useStickyState<string[]>("practise:history", []);
-  const session: Session | null = sessionTitle === "Mixed run" ? { title: "Mixed run", rounds: mixedRounds }
-    : (() => { const f = practiceFocuses.find((x) => x.name === sessionTitle); return f ? { title: f.name, rounds: f.rounds } : null; })();
-  const setSession = (s: Session | null) => setSessionTitle(s ? s.title : null);
 
-  const finish = (title: string) => setHistory((items) => [title, ...items.filter((item) => item !== title)].slice(0, 3));
+  const buildSession = (title: string | null): Session | null => {
+    if (!title) return null;
+    if (title === "Mixed run") return { title, rounds: mixedRounds };
+    const focus = practiceFocuses.find((item) => item.name === title);
+    return focus ? { title: focus.name, rounds: focus.rounds } : null;
+  };
+
+  const session = buildSession(running);
+  const start = (title: string) => {
+    setLastSession(title);
+    setRunning(title);
+  };
+  const finish = (title: string) => {
+    setHistory((items) => [title, ...items.filter((item) => item !== title)].slice(0, 5));
+  };
 
   if (session) {
-    return <PracticeGame rounds={session.rounds} mode="free" heading={session.title} storageKey={`practise:${session.title}`} onClose={() => setSession(null)} onComplete={() => finish(session.title)} />;
+    return (
+      <PracticeGame
+        rounds={session.rounds}
+        mode="free"
+        heading={session.title}
+        storageKey={`practise:${session.title}`}
+        onClose={() => setRunning(null)}
+        onComplete={() => finish(session.title)}
+      />
+    );
   }
 
+  const completedCount = history.length;
+  const weeklyProgress = Math.min(100, completedCount * 20);
+
   return (
-    <div className="rise-in">
-      <section className="overflow-hidden rounded-lg bg-ink text-primary-foreground shadow-lg">
-        <div className="grid gap-6 p-6 sm:p-8 md:grid-cols-[1fr_auto] md:items-end">
+    <div className="rise-in mx-auto max-w-6xl">
+      <section className="relative overflow-hidden rounded-lg bg-brand text-brand-foreground shadow-focus">
+        <div className="absolute inset-y-0 right-0 hidden w-2/5 opacity-20 md:block teacher-market-head" aria-hidden="true" />
+        <div className="relative grid gap-7 px-5 py-7 sm:px-8 sm:py-9 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end">
           <div>
-            <p className="mb-2 text-xs font-extrabold uppercase text-primary-foreground/60">Practise · your choice</p>
-            <h1 className="font-display text-4xl font-semibold sm:text-5xl">Sharpen the ears.</h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-primary-foreground/75">
-              Short sessions you pick yourself, any time. These drills sit apart from your lessons — finishing one never
-              unlocks a unit, it just keeps the sounds warm.
+            <div className="inline-flex items-center gap-2 rounded-sm bg-brand-foreground/10 px-2.5 py-1 text-[11px] font-black uppercase">
+              <Sparkles className="size-3.5 text-highlight" /> Free practise
+            </div>
+            <h1 className="mt-4 max-w-2xl font-display text-4xl font-semibold leading-tight sm:text-5xl">A quick workout for your Igbo.</h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-brand-foreground/80 sm:text-base">
+              Pick one skill, play for a few minutes, and repeat whenever you like. Practise never changes your lesson path.
             </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Button className="min-h-12 bg-highlight px-6 text-highlight-foreground hover:bg-highlight/90" onClick={() => start("Mixed run")}>
+                <Shuffle className="size-4" /> Surprise me <ArrowRight className="size-4" />
+              </Button>
+              {lastSession && buildSession(lastSession) ? (
+                <Button variant="secondary" className="min-h-12 border-brand-foreground/20 bg-brand-foreground/10 text-brand-foreground hover:bg-brand-foreground/15" onClick={() => start(lastSession)}>
+                  <Play className="size-4" /> Continue {lastSession}
+                </Button>
+              ) : null}
+            </div>
           </div>
-          <Button
-            className="border-b-4 border-highlight bg-highlight text-highlight-foreground hover:bg-highlight/90 active:translate-y-0.5 active:border-b-2"
-            onClick={() => setSession({ title: "Mixed run", rounds: mixedRounds })}
-          >
-            <Shuffle className="size-4" /> Mixed run <ArrowRight className="size-4" />
-          </Button>
+
+          <div className="grid grid-cols-3 divide-x divide-brand-foreground/15 rounded-md border border-brand-foreground/15 bg-brand-foreground/5 p-4 text-center backdrop-blur-sm">
+            <div className="px-2"><p className="font-display text-2xl font-semibold">{completedCount}</p><p className="mt-1 text-[10px] font-bold uppercase text-brand-foreground/65">Played</p></div>
+            <div className="px-2"><p className="font-display text-2xl font-semibold">{practiceFocuses.length}</p><p className="mt-1 text-[10px] font-bold uppercase text-brand-foreground/65">Games</p></div>
+            <div className="px-2"><p className="font-display text-2xl font-semibold">3–4</p><p className="mt-1 text-[10px] font-bold uppercase text-brand-foreground/65">Minutes</p></div>
+          </div>
         </div>
       </section>
 
-      <div className="mt-7 grid items-start gap-7 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <section aria-labelledby="focus-heading">
-          <div className="mb-4">
-            <p className="text-xs font-bold uppercase text-muted-foreground">Choose a focus</p>
-            <h2 id="focus-heading" className="mt-1 font-display text-2xl font-semibold">Five ways to warm up</h2>
+      <div className="mt-8 grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_19rem]">
+        <section aria-labelledby="practice-pick-heading">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-black uppercase text-primary">Choose your game</p>
+              <h2 id="practice-pick-heading" className="mt-1 font-display text-3xl font-semibold">What do you want to train?</h2>
+            </div>
+            <Headphones className="hidden size-7 text-primary sm:block" aria-hidden="true" />
           </div>
+
           <div className="grid gap-3 sm:grid-cols-2">
-            {practiceFocuses.map(({ id, name, detail, minutes, icon: Icon, rounds }) => {
+            {practiceFocuses.map(({ id, name, detail, minutes, icon: Icon, rounds }, index) => {
               const played = history.includes(name);
               return (
-                <article key={id} className="flex flex-col justify-between rounded-md border border-border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                  <div>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="grid size-11 place-items-center rounded-md bg-secondary text-secondary-foreground"><Icon className="size-5" /></div>
-                      {played ? <span className="inline-flex items-center gap-1 rounded-sm bg-secondary px-2 py-1 text-[10px] font-black uppercase text-secondary-foreground"><Check className="size-3" /> Done today</span> : null}
-                    </div>
-                    <h3 className="mt-4 font-display text-xl font-semibold">{name}</h3>
+                <article key={id} className={`group grid min-h-52 grid-rows-[auto_1fr_auto] overflow-hidden rounded-md border bg-card p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary hover:shadow-focus ${index === 0 ? "sm:col-span-2 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:grid-rows-1 sm:items-center sm:gap-5" : "border-border"}`}>
+                  <div className="flex items-start justify-between gap-3 sm:block">
+                    <div className="grid size-12 shrink-0 place-items-center rounded-md bg-secondary text-primary transition group-hover:bg-primary group-hover:text-primary-foreground"><Icon className="size-5" /></div>
+                    {played ? <span className="inline-flex items-center gap-1 rounded-sm bg-secondary px-2 py-1 text-[10px] font-black uppercase text-secondary-foreground sm:mt-3"><Check className="size-3" /> Played</span> : null}
+                  </div>
+                  <div className={index === 0 ? "sm:min-w-0" : "mt-4"}>
+                    <h3 className="font-display text-xl font-semibold">{name}</h3>
                     <p className="mt-1 text-sm leading-6 text-muted-foreground">{detail}</p>
+                    <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground"><Clock3 className="size-3.5" /> {rounds.length} rounds · about {minutes} min</p>
                   </div>
-                  <div className="mt-5 flex items-center justify-between gap-3">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground"><Clock className="size-3.5" /> {rounds.length} activities · ~{minutes} min</span>
-                    <Button variant="secondary" className="border-b-2 border-brand active:translate-y-0.5 active:border-b-0" onClick={() => setSession({ title: name, rounds })}>
-                      Start
-                    </Button>
-                  </div>
+                  <Button variant={index === 0 ? "primary" : "secondary"} className="mt-5 min-h-11 w-full sm:w-auto" onClick={() => start(name)}>
+                    <Play className="size-4" /> {played ? "Play again" : "Start"}
+                  </Button>
                 </article>
               );
             })}
@@ -74,29 +122,29 @@ export function PracticeView() {
           <p className="mt-4 inline-flex rounded-sm bg-muted px-2 py-1 text-[10px] font-black uppercase text-muted-foreground">Placeholder content — sample lines, not verified teaching material</p>
         </section>
 
-        <aside className="space-y-5 xl:sticky xl:top-26">
+        <aside className="space-y-4 xl:sticky xl:top-26">
           <section className="rounded-md border border-border bg-card p-5 shadow-sm">
-            <div className="flex items-center gap-2"><Flame className="size-4 text-highlight" fill="currentColor" /><h2 className="text-sm font-extrabold uppercase">This week</h2></div>
-            <p className="mt-3 font-display text-3xl font-semibold">{history.length ? history.length : 0} <span className="text-base font-bold text-muted-foreground">sessions practised</span></p>
-            <ul className="mt-4 space-y-2 text-sm">
-              {history.length ? history.map((item) => <li key={item} className="flex items-center gap-2 font-bold"><Check className="size-4 text-primary" /> {item}</li>) : <li className="text-muted-foreground">Nothing yet — pick a focus and run one.</li>}
-            </ul>
-            <div className="mt-5 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-highlight" style={{ width: `${Math.min(100, Math.round((learner.completedMinutes / learner.dailyGoal) * 100))}%` }} /></div>
-            <p className="mt-2 text-xs font-bold text-muted-foreground">{learner.completedMinutes} of {learner.dailyGoal} minutes on your goal</p>
+            <div className="flex items-center justify-between"><span className="grid size-9 place-items-center rounded-md bg-secondary text-primary"><Flame className="size-4" /></span><span className="text-xs font-black text-primary">{weeklyProgress}%</span></div>
+            <h2 className="mt-4 font-display text-xl font-semibold">Your weekly rhythm</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Five short sessions make a strong week.</p>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-highlight transition-all" style={{ width: `${weeklyProgress}%` }} /></div>
+            <p className="mt-2 text-xs font-bold text-muted-foreground">{completedCount} of 5 games played</p>
           </section>
 
           <section className="rounded-md border border-border bg-secondary p-5">
-            <div className="flex items-start gap-3"><Layers className="mt-0.5 size-5 text-highlight-foreground" /><div><p className="text-xs font-extrabold uppercase text-muted-foreground">How this differs</p><h2 className="mt-1 font-display text-xl font-semibold">Drills, not lessons</h2></div></div>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">Lessons move you along the path and are marked done. Practise sessions repeat forever, in no particular order, and reshuffle the tiles each time.</p>
+            <Gauge className="size-5 text-primary" />
+            <h2 className="mt-3 font-display text-xl font-semibold">No pressure</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">Repeat a game as often as you need. Your course stays exactly where you left it.</p>
           </section>
 
-          <section className="rounded-md border border-border bg-card p-5">
-            <h2 className="text-sm font-extrabold uppercase">Sound promise</h2>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">Audio samples and tile labels are placeholders until recorded, reviewed material is connected. Nothing here is presented as verified.</p>
-          </section>
+          {history.length ? (
+            <section className="rounded-md border border-border bg-card p-5">
+              <div className="flex items-center gap-2"><Trophy className="size-4 text-highlight" /><h2 className="text-sm font-extrabold uppercase">Recently played</h2></div>
+              <ul className="mt-3 space-y-2 text-sm">{history.slice(0, 3).map((item) => <li key={item} className="flex items-center gap-2 font-bold"><Check className="size-4 text-primary" />{item}</li>)}</ul>
+            </section>
+          ) : null}
         </aside>
       </div>
-
     </div>
   );
 }

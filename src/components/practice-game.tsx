@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, CornerDownLeft, RotateCcw, Volume2, X } from "lucide-react";
+import { ArrowLeft, Check, CornerDownLeft, RotateCcw, Sparkles, Star, Volume2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/button";
 import { foldIgboText, normalizeIgboText } from "@/lib/igbo-text";
@@ -108,8 +108,8 @@ export function PracticeGame({ rounds, mode, heading, onClose, onComplete, stora
   return (
     <section ref={rootRef} className="rise-in mx-auto max-w-3xl scroll-mt-24" aria-labelledby="practice-title">
       {/* Always-visible top bar with a labelled way out */}
-      <div className="sticky top-16 z-30 -mx-1 mb-4 flex items-center gap-3 rounded-md border border-border bg-card/95 px-2 py-2 shadow-sm backdrop-blur sm:top-20">
-        <Button variant="ghost" onClick={exit} className="shrink-0"><ArrowLeft className="size-4" /> {backLabel}</Button>
+      <div className="sticky top-16 z-30 -mx-1 mb-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-md border border-border bg-card/95 px-2 py-2 shadow-sm backdrop-blur sm:top-20 sm:gap-3">
+        <Button variant="ghost" onClick={exit} className="shrink-0 px-2 sm:px-4"><ArrowLeft className="size-4" /><span className="hidden sm:inline">{backLabel}</span><span className="sm:hidden">Back</span></Button>
         <div className="flex flex-1 gap-1" aria-label={`Question ${Math.min(round + 1, total)} of ${total}`}>
           {views.map((_, i) => <span key={i} className={`h-2 flex-1 rounded-full ${i < round || finished || (i === round && checked) ? "bg-primary" : i === round ? "bg-primary/40" : "bg-muted"}`} />)}
         </div>
@@ -124,12 +124,14 @@ export function PracticeGame({ rounds, mode, heading, onClose, onComplete, stora
         </div>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-focus">
         {finished ? (
-          <div className="px-6 py-12 text-center">
-            <span className="mx-auto grid size-20 place-items-center rounded-full bg-secondary text-primary"><Check className="size-10" strokeWidth={3} /></span>
+          <div className="relative overflow-hidden px-5 py-12 text-center sm:px-8 sm:py-16">
+            <Sparkles className="absolute left-8 top-10 size-6 text-highlight" aria-hidden="true" />
+            <Star className="absolute right-10 top-16 size-5 text-primary" aria-hidden="true" />
+            <span className="mx-auto grid size-20 place-items-center rounded-full bg-primary text-primary-foreground shadow-focus"><Check className="size-10" strokeWidth={3} /></span>
             <h2 id="practice-title" className="mt-5 font-display text-3xl font-semibold">{isFree ? "Session complete" : "Round complete"}</h2>
-            <p className="mt-2 text-lg font-bold">{score} of {total} correct</p>
+            <p className="mt-3 font-display text-2xl font-semibold text-primary">{score} of {total} correct</p>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">{isFree ? "Nothing here moves your path — it just keeps the words warm." : "You worked through sound, context, response and typing."}</p>
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
               <Button variant="secondary" onClick={restart}><RotateCcw className="size-4" /> {isFree ? "Practise again" : "Play again"}</Button>
@@ -154,7 +156,7 @@ export function PracticeGame({ rounds, mode, heading, onClose, onComplete, stora
               )}
             </div>
 
-            <div className="border-t border-border bg-muted/50 p-5 sm:p-7">
+            <div className="border-t border-border bg-muted/40 p-4 sm:p-7">
               {current.kind === "type" ? (
                 <form onSubmit={(e) => { e.preventDefault(); if (checked) next(); else check(); }}>
                   <p className="rounded-md border border-border bg-card p-4 text-base font-semibold leading-7">{current.meaning}</p>
@@ -173,16 +175,17 @@ export function PracticeGame({ rounds, mode, heading, onClose, onComplete, stora
                   <button type="submit" hidden />
                 </form>
               ) : (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
                   {current.options.map((option, index) => {
                     const chosen = selected === index;
                     const right = checked && index === current.correct;
                     const wrong = checked && chosen && verdict === "wrong";
                     return (
                       <button key={`${option.label}-${index}`} type="button" disabled={checked} onClick={() => setSelected(index)} aria-pressed={chosen}
-                        className={`flex min-h-24 items-center gap-3 rounded-md border-2 bg-card p-3 text-left transition ${chosen ? "border-primary" : "border-border hover:border-primary/50"} ${right ? "border-primary bg-secondary" : ""} ${wrong ? "border-accent bg-accent/10" : ""}`}>
-                        <span className="text-3xl" aria-hidden="true">{option.icon}</span>
-                        <span className="text-sm font-extrabold leading-5">{option.label}</span>
+                        className={`grid min-h-20 grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 rounded-md border-2 bg-card p-3 text-left transition active:scale-[0.99] sm:min-h-24 ${chosen ? "border-primary bg-secondary/50" : "border-border hover:border-primary/50"} ${right ? "border-primary bg-secondary" : ""} ${wrong ? "border-accent bg-accent/10" : ""}`}>
+                        <span className="grid size-11 place-items-center rounded-md bg-muted text-2xl" aria-hidden="true">{option.icon}</span>
+                        <span className="min-w-0 text-sm font-extrabold leading-5">{option.label}</span>
+                        {chosen ? <span className="grid size-6 place-items-center rounded-full bg-primary text-primary-foreground"><Check className="size-3.5" /></span> : null}
                       </button>
                     );
                   })}
@@ -192,7 +195,7 @@ export function PracticeGame({ rounds, mode, heading, onClose, onComplete, stora
               <div className={`mt-5 flex flex-col gap-3 sm:flex-row sm:items-center ${checked ? "rounded-md border p-3 " + (verdict === "correct" ? "border-primary bg-secondary" : "border-accent bg-accent/10") : ""}`}>
                 {checked && <p className="flex-1 text-sm font-bold" role="status">{feedback}</p>}
                 {!checked && <p className="hidden flex-1 text-xs text-muted-foreground sm:block">{isType ? <>Press <CornerDownLeft className="inline size-3" /> Enter to check · Esc to leave</> : "Esc to leave"}</p>}
-                <Button className="sm:min-w-44" disabled={!checked && !canCheck} onClick={checked ? next : check}>
+                <Button className="min-h-12 w-full sm:w-auto sm:min-w-44" disabled={!checked && !canCheck} onClick={checked ? next : check}>
                   {checked ? (round === total - 1 ? "See results" : "Next") : "Check"}
                 </Button>
               </div>
