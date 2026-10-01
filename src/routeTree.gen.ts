@@ -11,8 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DictionaryRouteImport } from './routes/dictionary'
+import { Route as KeyboardRouteImport } from './routes/keyboard'
+import { Route as LearnRouteImport } from './routes/learn'
+import { Route as NdebeRouteImport } from './routes/ndebe'
 import { Route as PlatformRouteImport } from './routes/platform'
+import { Route as PractiseRouteImport } from './routes/practise'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as StaffRouteImport } from './routes/staff'
+import { Route as TeachersRouteImport } from './routes/teachers'
+import { Route as TutorRouteImport } from './routes/tutor'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -24,9 +33,39 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DictionaryRoute = DictionaryRouteImport.update({
+  id: '/dictionary',
+  path: '/dictionary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KeyboardRoute = KeyboardRouteImport.update({
+  id: '/keyboard',
+  path: '/keyboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnRoute = LearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NdebeRoute = NdebeRouteImport.update({
+  id: '/ndebe',
+  path: '/ndebe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlatformRoute = PlatformRouteImport.update({
   id: '/platform',
   path: '/platform',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PractiseRoute = PractiseRouteImport.update({
+  id: '/practise',
+  path: '/practise',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -34,39 +73,130 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StaffRoute = StaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeachersRoute = TeachersRouteImport.update({
+  id: '/teachers',
+  path: '/teachers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TutorRoute = TutorRouteImport.update({
+  id: '/tutor',
+  path: '/tutor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/dictionary': typeof DictionaryRoute
+  '/keyboard': typeof KeyboardRoute
+  '/learn': typeof LearnRoute
+  '/ndebe': typeof NdebeRoute
   '/platform': typeof PlatformRoute
+  '/practise': typeof PractiseRoute
+  '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/staff': typeof StaffRoute
+  '/teachers': typeof TeachersRoute
+  '/tutor': typeof TutorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/dictionary': typeof DictionaryRoute
+  '/keyboard': typeof KeyboardRoute
+  '/learn': typeof LearnRoute
+  '/ndebe': typeof NdebeRoute
   '/platform': typeof PlatformRoute
+  '/practise': typeof PractiseRoute
+  '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/staff': typeof StaffRoute
+  '/teachers': typeof TeachersRoute
+  '/tutor': typeof TutorRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/dictionary': typeof DictionaryRoute
+  '/keyboard': typeof KeyboardRoute
+  '/learn': typeof LearnRoute
+  '/ndebe': typeof NdebeRoute
   '/platform': typeof PlatformRoute
+  '/practise': typeof PractiseRoute
+  '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/staff': typeof StaffRoute
+  '/teachers': typeof TeachersRoute
+  '/tutor': typeof TutorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/platform' | '/reset-password'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/dictionary'
+    | '/keyboard'
+    | '/learn'
+    | '/ndebe'
+    | '/platform'
+    | '/practise'
+    | '/profile'
+    | '/reset-password'
+    | '/staff'
+    | '/teachers'
+    | '/tutor'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/platform' | '/reset-password'
-  id: '__root__' | '/' | '/auth' | '/platform' | '/reset-password'
+  to:
+    | '/'
+    | '/auth'
+    | '/dictionary'
+    | '/keyboard'
+    | '/learn'
+    | '/ndebe'
+    | '/platform'
+    | '/practise'
+    | '/profile'
+    | '/reset-password'
+    | '/staff'
+    | '/teachers'
+    | '/tutor'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/dictionary'
+    | '/keyboard'
+    | '/learn'
+    | '/ndebe'
+    | '/platform'
+    | '/practise'
+    | '/profile'
+    | '/reset-password'
+    | '/staff'
+    | '/teachers'
+    | '/tutor'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  DictionaryRoute: typeof DictionaryRoute
+  KeyboardRoute: typeof KeyboardRoute
+  LearnRoute: typeof LearnRoute
+  NdebeRoute: typeof NdebeRoute
   PlatformRoute: typeof PlatformRoute
+  PractiseRoute: typeof PractiseRoute
+  ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  StaffRoute: typeof StaffRoute
+  TeachersRoute: typeof TeachersRoute
+  TutorRoute: typeof TutorRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -85,11 +215,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dictionary': {
+      id: '/dictionary'
+      path: '/dictionary'
+      fullPath: '/dictionary'
+      preLoaderRoute: typeof DictionaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/keyboard': {
+      id: '/keyboard'
+      path: '/keyboard'
+      fullPath: '/keyboard'
+      preLoaderRoute: typeof KeyboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn': {
+      id: '/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof LearnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ndebe': {
+      id: '/ndebe'
+      path: '/ndebe'
+      fullPath: '/ndebe'
+      preLoaderRoute: typeof NdebeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/platform': {
       id: '/platform'
       path: '/platform'
       fullPath: '/platform'
       preLoaderRoute: typeof PlatformRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/practise': {
+      id: '/practise'
+      path: '/practise'
+      fullPath: '/practise'
+      preLoaderRoute: typeof PractiseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -99,14 +271,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/staff': {
+      id: '/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof StaffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teachers': {
+      id: '/teachers'
+      path: '/teachers'
+      fullPath: '/teachers'
+      preLoaderRoute: typeof TeachersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tutor': {
+      id: '/tutor'
+      path: '/tutor'
+      fullPath: '/tutor'
+      preLoaderRoute: typeof TutorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  DictionaryRoute: DictionaryRoute,
+  KeyboardRoute: KeyboardRoute,
+  LearnRoute: LearnRoute,
+  NdebeRoute: NdebeRoute,
   PlatformRoute: PlatformRoute,
+  PractiseRoute: PractiseRoute,
+  ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  StaffRoute: StaffRoute,
+  TeachersRoute: TeachersRoute,
+  TutorRoute: TutorRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
